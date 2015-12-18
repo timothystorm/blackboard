@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS locations (
+  id BIGINT PRIMARY KEY,
+  postal VARCHAR(12) NOT NULL,
+  created_at TIMESTAMP default CURRENT_TIMESTAMP
+);
