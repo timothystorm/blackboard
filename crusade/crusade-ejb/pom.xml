@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>storm.crusade</groupId>
+		<artifactId>crusade</artifactId>
+<<<<<<< HEAD
+		<version>0.0.1-SNAPSHOT</version>
+=======
+		<version>0.0.1</version>
+>>>>>>> origin/master
+	</parent>
+
+	<artifactId>crusade-ejb</artifactId>
+	<packaging>ejb</packaging>
+
+	<properties>
+		<javaee-api.version>6.0</javaee-api.version>
+	</properties>
+
+	<dependencies>
+		<!-- Java EE -->
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>${javaee-api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>storm.crusade</groupId>
+			<artifactId>crusade-domain</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ejb-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<ejbVersion>3.1</ejbVersion>
+					<generateClient>true</generateClient>
+					<clientIncludes>
+						<clientInclude>storm/cursade/ejb/remote/**</clientInclude>
+					</clientIncludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

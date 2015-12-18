@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration xmlns="http://storm.crusade/schema/rangeconfiguration"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://storm.crusade/schema/rangeconfiguration range-configuration.xsd ">
+	<context>
+		<!-- Development (localhost) -->
+		<hosts level="0" />
+	</context>
+
+	<property key="inception_date">
+		<value level="*">20151101</value>
+	</property>
+</configuration>
