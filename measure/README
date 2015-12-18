@@ -1,0 +1,20 @@
+Shameless rip-off of the Units of Measure API 
+(http://www.unitsofmeasurement.org/) that attempts to bring a little sanity in
+situations where you aren't trying to send a rocket to mars but are doing
+simple measurement calculations.  It is also to eliminate some of the
+short-comings of Units of Measure API such as the ability to add
+quantities instead of units, because maybe I'm the only one but
+performing math functions such as meter + meter doesn't make as much 
+sense as 10 + 20.  It also makes incomplete declarations such as
+velocity as a function of distance/time which is only one possible
+definition.
+
+Future plans:
+* Add a interpreter that can take in free formed strings and spit out the 
+  correct quantity and unit - 
+  ex. "4 hours" ~= Time.hour(4, TimeUnit.HOUR);
+* Create (de)compose methods that can represent quantities
+  composed or decomposed - 
+  ex. Time.compose("4 hours, 20 minutes, 14 seconds") == Time.second(15614); 
+      Time.decompose(Time.second(15614)) == "4 hours, 20 minutes, 14 seconds";
+  
