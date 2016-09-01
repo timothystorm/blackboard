@@ -36,13 +36,13 @@ public final class Ping {
         while ((line = reader.readLine()) != null) {
           str.append(line).append(StringUtils.LF);
         }
+        System.out.println(str);
       } catch (InterruptedException e) {
         return;
       } catch (Exception e) {
         str.append(e.getMessage()).append(StringUtils.LF);
-      } finally {
-        System.out.println(str);
-      }
+        System.err.println(str);
+      } 
     }
   }
 

@@ -11,38 +11,6 @@ import org.storm.abseil.runnable.DelayRunnable;
 
 public class AbseilTest {
 
-  @Test(timeout = 5000)
-  public void shutdownNow_fixed_tasks() throws Exception {
-    Abseil abseil = AbseilBuilder.newFixedTaskAbseilBuilder(Integer.MAX_VALUE, TimeUnit.MINUTES).build();
-    abseil.process(() -> new DelayRunnable(Integer.MAX_VALUE, TimeUnit.SECONDS));
-
-    // let the absail cycle up
-    Thread.sleep(1000);
-
-    // create background thread to kill abseil
-    new Thread(() -> {
-      abseil.shutdownNow();
-    }).start();
-
-    assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
-  }
-
-  @Test(timeout = 5000)
-  public void shutdownNow_pooled_tasks() throws Exception {
-    Abseil abseil = AbseilBuilder.newFixedTaskAbseilBuilder(Integer.MAX_VALUE, TimeUnit.MINUTES).build();
-    abseil.process(() -> new DelayRunnable(Integer.MAX_VALUE, TimeUnit.SECONDS));
-
-    // let the absail cycle up
-    Thread.sleep(1000);
-
-    // create background thread to kill abseil
-    new Thread(() -> {
-      abseil.shutdownNow();
-    }).start();
-
-    assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
-  }
-
   @Test
   @Ignore("Only used for debugging by keeping the Abseil going indefinitely")
   public void run_forever() throws Exception {
@@ -69,16 +37,16 @@ public class AbseilTest {
       abseil.shutdown();
     }).start();
 
-    assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
+     assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
   }
 
   /**
    * Abseil should be stoppable even when processes are hung
    */
-  @Test
+  @Test(timeout = 5000)
   public void shutdown_pooled_tasks() throws Exception {
     Abseil abseil = AbseilBuilder.newPooledTaskAbseilBuilder(Integer.MAX_VALUE, TimeUnit.MINUTES).build();
-    abseil.process(() -> new DelayRunnable(100, TimeUnit.MILLISECONDS));
+    abseil.process(() -> new DelayRunnable(Integer.MAX_VALUE, TimeUnit.SECONDS));
 
     // let the absail cycle up
     Thread.sleep(1000);
@@ -88,7 +56,7 @@ public class AbseilTest {
       abseil.shutdown();
     }).start();
 
-    assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
+     assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
   }
 
   /**
@@ -102,7 +70,7 @@ public class AbseilTest {
     // let the absail cycle up
     Thread.sleep(1000);
 
-    assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
+     assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
   }
 
   /**
@@ -116,7 +84,7 @@ public class AbseilTest {
     // let the absail cycle up
     Thread.sleep(1000);
 
-    assertState(abseil, State.SHUTDOWN, 0, TimeUnit.SECONDS);
+     assertState(abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
   }
 
   /**
@@ -137,7 +105,7 @@ public class AbseilTest {
       actualState = abseil.getState();
       if (actualState.is(expectedState)) return;
       else Thread.sleep(1000 /* 1 second */);
-      i++;
+      i += 1000;
     } while (i < timeoutMillis);
 
     fail(String.format("Never transitioned to '%s', final state '%s'", expectedState, actualState));

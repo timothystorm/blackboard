@@ -8,7 +8,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.storm.abseil" level="WARN" additivity="false">
+  <logger name="org.storm.abseil" level="ERROR" additivity="false">
    <appender-ref ref="STDOUT" />
   </logger>
 

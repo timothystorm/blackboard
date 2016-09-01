@@ -42,6 +42,9 @@ public class Abseil {
       _average.set(monitor.getAverageRuntime());
     }
 
+    /**
+     * setup task resources
+     */
     void init() {
       if (getState().is(State.INIT)) {
         transitionTo(State.STARTING);
@@ -51,13 +54,33 @@ public class Abseil {
     }
 
     /**
+     * Transitions current state to the desired state
+     * 
+     * @param state
+     *          - to transition to
+     * @return previous state
+     */
+    private State transitionTo(final State state) {
+      _stateLock.lock();
+      try {
+        State prev = _state;
+        _state = state;
+
+        if (log.isInfoEnabled()) log.info("{} -> {}", prev, _state);
+        return prev;
+      } finally {
+        _stateLock.unlock();
+      }
+    }
+
+    /**
      * Processes the {@link RunnableFactory} by submitting a new command for each {@link Runnable} of the
      * {@link RunnableFactory}.
      */
     @Override
     public void run() {
-      if (log.isDebugEnabled()) log.debug("absail running...");
       init();
+      if (log.isDebugEnabled()) log.debug("absail running...");
 
       Runnable run = null;
       while (getState().is(State.RUNNING) && (run = _runnableFactory.build()) != null) {
@@ -65,34 +88,45 @@ public class Abseil {
       }
 
       if (log.isDebugEnabled()) log.debug("absail shutting down.");
-      shutdown(true);
+      shutdown();
     }
 
     /**
-     * Shut down the running task.
+     * Shutdown this task.
      * 
-     * @param graceful
-     *          - true: orderly shutdown by allowing active commands to complete. false: attempt to stop active
-     *          commands.
      */
-    void shutdown(final boolean graceful) {
+    private void shutdown() {
       if (getState().is(State.RUNNING)) {
-        if (log.isDebugEnabled()) log.debug("shut down gracefully='{}' starting...", graceful);
-        transitionTo(State.SHUTTING_DOWN);
-
-        if (graceful) _executor.shutdown();
-        else _executor.shutdownNow();
+        if (log.isDebugEnabled()) log.debug("shut down starting...");
 
         try {
+          _executor.shutdownNow();
+          transitionTo(State.SHUTTING_DOWN);
+
           // configure terminate timeout
           long wait = _average.get() * _active.get();
           long median = Math.min(Math.max(wait, _minWait), _maxWait);
-
           _executor.awaitTermination(median, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ignore) {} finally {
-          if (!_executor.isTerminated()) kill();
-          else transitionTo(State.SHUTDOWN);
+          
+          if(_executor.isTerminated()) transitionTo(State.SHUTDOWN);
+          else kill(/* forcefully kill this thread */);
+        } catch (InterruptedException e) {
+          return;
         }
+      }
+    }
+
+    /**
+     * @return current state of this {@link Abseil}
+     */
+    public State getState() {
+      _stateLock.lock();
+
+      try {
+        State currentState = _state;
+        return currentState;
+      } finally {
+        _stateLock.unlock();
       }
     }
   }
@@ -101,8 +135,6 @@ public class Abseil {
    * State of the Abseil
    */
   public enum State {
-    FAIL,
-    FORCE_SHUTDOWN,
     INIT,
     RUNNING,
     SHUTDOWN,
@@ -127,13 +159,13 @@ public class Abseil {
   private final Long          _maxRuntime;
 
   /** max time to wait for a shutdown */
-  private Long                _maxWait      = TimeUnit.SECONDS.toMillis(32);
+  private Long                _maxWait      = TimeUnit.SECONDS.toMillis(10);
 
   /** min time to wait for a shutdown */
-  private Long                _minWait      = TimeUnit.SECONDS.toMillis(4);
+  private Long                _minWait      = TimeUnit.SECONDS.toMillis(3);
 
   /** abseil process that is run apart from the main thread and can be stopped if the abseil task is unresponsive */
-  private Thread              _process;
+  private Thread              _processor;
 
   /** time this abseil process started */
   private final AtomicLong    _startAt      = new AtomicLong(Long.MIN_VALUE);
@@ -146,46 +178,26 @@ public class Abseil {
 
   private RunnableFactory     _runnableFactory;
 
-  /** runnable abseil task that does the work of executing the strategy */
   private final AbseilTask    _task;
 
   /** period sleep duration for the timeout daemon */
-  private Long                _timeoutSleep = TimeUnit.MILLISECONDS.toMillis(250);
+  private Long                _timeoutSleep = TimeUnit.MILLISECONDS.toMillis(500);
 
   Abseil(AbseilBuilder builder) {
     _maxRuntime = builder.getMaxRuntimeMillis();
     _task = new AbseilTask(builder.getExecutorService());
-    _process = new Thread(_task, "Abseil worker");
+    _processor = new Thread(_task, "Abseil - processor");
   }
 
   /**
-   * @return current state of this {@link Abseil}
-   */
-  public State getState() {
-    _stateLock.lock();
-
-    try {
-      State current = _state;
-      return current;
-    } finally {
-      _stateLock.unlock();
-    }
-  }
-
-  /**
-   * Forcefully kill this {@link Abseil}
+   * Forcefully kill this {@link Abseil} processor thread
    */
   private void kill() {
     log.warn("killing process");
-    transitionTo(State.FORCE_SHUTDOWN);
-    _process.interrupt();
-    
-    if(_process.isAlive())  transitionTo(State.FAIL);
-    else  transitionTo(State.SHUTDOWN);
-    
+    _processor.interrupt();
     Thread.currentThread().interrupt();
   }
-  
+
   /**
    * Process the {@link RunnableFactory}
    */
@@ -200,9 +212,8 @@ public class Abseil {
         while ((System.currentTimeMillis() - _startAt.get()) < _maxRuntime) {
           Thread.sleep(_timeoutSleep);
         }
-        _task.shutdown(true);
+        shutdown();
       } catch (InterruptedException e) {
-        log.warn("timeout interrupted", e);
         kill();
       }
     }, "Abseil - timeout monitor");
@@ -211,10 +222,10 @@ public class Abseil {
 
     // setup short circuit shutdown
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      _task.shutdown(false);
+      shutdown();
     }));
 
-    _process.start();
+    _processor.start();
   }
 
   /**
@@ -241,37 +252,11 @@ public class Abseil {
     return this;
   }
 
-  /**
-   * Initiate a graceful shutdown of this this {@link Abseil}.
-   */
   public void shutdown() {
-    _task.shutdown(true);
+    _task.shutdown();
   }
-  
-  /**
-   * Initiate a hard shutdown of this this {@link Abseil}.
-   */
-  public void shutdownNow(){
-    _task.shutdown(false);
-  }
-  
-  /**
-   * Transitions current state to the desired state
-   * 
-   * @param state
-   *          - to transition to
-   * @return previous state
-   */
-  private State transitionTo(final State state) {
-    _stateLock.lock();
-    try {
-      State prev = _state;
-      _state = state;
 
-      if (log.isInfoEnabled()) log.info("{} -> {}", prev, _state);
-      return prev;
-    } finally {
-      _stateLock.unlock();
-    }
+  public State getState() {
+    return _task.getState();
   }
 }
