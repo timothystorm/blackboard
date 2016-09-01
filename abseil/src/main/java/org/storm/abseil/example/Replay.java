@@ -5,21 +5,15 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.storm.abseil.Abseil;
 import org.storm.abseil.AbseilBuilder;
 
-/**
- * Small example of using {@link Abseil}
- * 
- * @author Timothy Storm
- */
-public final class Ping {
-  private static class PingRunnable implements Runnable {
+public class Replay {
+  private static class ReplayRunnable implements Runnable {
     private final String _command;
 
-    PingRunnable(String host) {
-      _command = String.format("ping -%c 3 %s", (SystemUtils.IS_OS_WINDOWS ? 'n' : 'c'), host);
+    ReplayRunnable(String command) {
+      _command = command;
     }
 
     @Override
@@ -29,26 +23,27 @@ public final class Ping {
 
       try {
         process = Runtime.getRuntime().exec(_command);
+        
         process.waitFor();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line = null;
         while ((line = reader.readLine()) != null) {
-          str.append(line).append(StringUtils.LF);
+          str.append(line);
         }
         System.out.println(str);
       } catch (InterruptedException e) {
         return;
       } catch (Exception e) {
         System.err.println(str.append(e.getMessage()).append(StringUtils.LF));
-      } 
+      }
     }
   }
 
-  public static void main(String[] args) {
-    Abseil abseil = AbseilBuilder.newFixedTaskAbseilBuilder(10, TimeUnit.SECONDS).tasks(4).build();
+  public static void main(String[] args) throws Exception {
+    Abseil abseil = AbseilBuilder.newSingleTaskAbseilBuilder(10, TimeUnit.SECONDS).build();
     abseil.process(() -> {
-      return new PingRunnable(args[0]);
+      return new ReplayRunnable(StringUtils.join(args, ' '));
     });
   }
 }

@@ -47,6 +47,14 @@ public abstract class AbseilBuilder {
     return new FixedTaskAbseilBuilder().maxRuntime(maxRuntime, unit);
   }
 
+  public static SingleTaskAbseilBuilder newSingleTaskAbseilBuilder() {
+    return newSingleTaskAbseilBuilder();
+  }
+
+  public static SingleTaskAbseilBuilder newSingleTaskAbseilBuilder(long maxRuntime, TimeUnit unit) {
+    return new SingleTaskAbseilBuilder().maxRuntime(maxRuntime, unit);
+  }
+
   /**
    * Creates a fixed {@link Abseil} which executes a runnable tasks simultaneously. The number of tasks being worked
    * never exceeds the max task boundary.
@@ -93,6 +101,14 @@ public abstract class AbseilBuilder {
       // Copied from Executors.newCachedThreadPool() but allows the user to customize the min/max task bounds
       return new ThreadPoolExecutor((_minTasks == null ? 0 : _minTasks),
           (_maxTasks == null ? Integer.MAX_VALUE : _maxTasks), 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+          DEFAULT_HANDLER);
+    }
+  }
+
+  public static class SingleTaskAbseilBuilder extends AbseilBuilder {
+    @Override
+    ExecutorService getExecutorService() {
+      return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1),
           DEFAULT_HANDLER);
     }
   }
