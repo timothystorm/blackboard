@@ -3,7 +3,7 @@ package org.storm.abseil.runnable;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Delays execution of decorated {@link Runnable} by the specified time.
+ * Delays execution of decorated {@link Runnable} by the specified time. Used for testing.
  * 
  * @author Timothy Storm
  */
