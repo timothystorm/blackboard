@@ -1,5 +1,6 @@
 package org.storm.abseil;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -20,22 +21,47 @@ public abstract class AbseilBuilder {
    * never exceeds the max task boundary.
    */
   public static class FixedTaskAbseilBuilder extends AbseilBuilder {
-    private Integer _tasks;
+    private static final Long        DEFAULT_KEEP_ALIVE = TimeUnit.SECONDS.toMillis(1);
+    private static final Integer     DEFAULT_TASKS      = 10;
+    private RejectedExecutionHandler _handler;
+    private Long                     _keepAlive;
+    private BlockingQueue<Runnable>  _queue;
+    private Integer                  _tasks;
 
     public FixedTaskAbseilBuilder(long maxRuntime, TimeUnit unit) {
       super(maxRuntime, unit);
     }
 
+    public FixedTaskAbseilBuilder keepAlive(Long time, TimeUnit unit) {
+      assert time >= 0;
+
+      _keepAlive = unit.toMillis(time);
+      return this;
+    }
+
     @Override
-    public ExecutorService getExecutorService() {
-      // Copied from Executors.newFixedThreadPool() but allows the user to customize the task count
-      int taskCount = _tasks == null ? DEFAULT_MAX_TASK_COUNT : _tasks;
-      return new ThreadPoolExecutor(taskCount, taskCount, 0L, TimeUnit.MILLISECONDS,
-          new LinkedBlockingQueue<Runnable>(taskCount), DEFAULT_HANDLER);
+    public ExecutorService newExecutorService() {
+      Integer tasks = _tasks == null ? DEFAULT_TASKS : _tasks;
+      Long keepAlive = _keepAlive == null ? DEFAULT_KEEP_ALIVE : _keepAlive;
+      BlockingQueue<Runnable> queue = _queue == null ? new LinkedBlockingQueue<Runnable>(tasks) : _queue;
+      RejectedExecutionHandler handler = _handler == null ? DEFAULT_HANDLER : _handler;
+
+      return new ThreadPoolExecutor(tasks, tasks, keepAlive, TimeUnit.MILLISECONDS, queue, handler);
+    }
+
+    public FixedTaskAbseilBuilder queue(BlockingQueue<Runnable> queue) {
+      _queue = queue;
+      return this;
+    }
+
+    public FixedTaskAbseilBuilder rejectHandler(RejectedExecutionHandler handler) {
+      _handler = handler;
+      return this;
     }
 
     public FixedTaskAbseilBuilder tasks(int tasks) {
       assert tasks > 0;
+
       _tasks = tasks;
       return this;
     }
@@ -46,19 +72,16 @@ public abstract class AbseilBuilder {
    * within the min/max task bounds.
    */
   public static class PooledTaskAbseilBuilder extends AbseilBuilder {
-    private Long    _keepAlive;
-    private Integer _maxTasks, _minTasks;
+    private static final Long        DEFAULT_KEEP_ALIVE = TimeUnit.SECONDS.toMillis(2);
+    private static final Integer     DEFAULT_MAX_TASKS  = 10;
+    private static final Integer     DEFAULT_MIN_TASKS  = 0;
+    private RejectedExecutionHandler _handler;
+    private Long                     _keepAlive;
+    private Integer                  _maxTasks, _minTasks;
+    private BlockingQueue<Runnable>  _queue;
 
     public PooledTaskAbseilBuilder(long maxRuntime, TimeUnit unit) {
       super(maxRuntime, unit);
-    }
-
-    @Override
-    public ExecutorService getExecutorService() {
-      // Copied from Executors.newCachedThreadPool() but allows the user to customize the min/max task bounds
-      return new ThreadPoolExecutor((_minTasks == null ? 0 : _minTasks),
-          (_maxTasks == null ? DEFAULT_MAX_TASK_COUNT : _maxTasks), (_keepAlive == null ? 2000 : _keepAlive),
-          TimeUnit.MILLISECONDS, new SynchronousQueue<Runnable>(), DEFAULT_HANDLER);
     }
 
     public PooledTaskAbseilBuilder keepAlive(Long keepAlive, TimeUnit unit) {
@@ -68,6 +91,7 @@ public abstract class AbseilBuilder {
 
     public PooledTaskAbseilBuilder maxTasks(int maxTasks) {
       assert maxTasks > 0;
+
       _maxTasks = maxTasks;
       return this;
     }
@@ -77,6 +101,28 @@ public abstract class AbseilBuilder {
       _minTasks = minTasks;
       return this;
     }
+
+    @Override
+    public ExecutorService newExecutorService() {
+      Integer minThread = _minTasks == null ? DEFAULT_MIN_TASKS : _minTasks;
+      Integer maxThread = _maxTasks == null ? DEFAULT_MAX_TASKS : _maxTasks;
+      Long keepAlive = _keepAlive == null ? DEFAULT_KEEP_ALIVE : _keepAlive;
+      BlockingQueue<Runnable> queue = _queue == null ? new SynchronousQueue<Runnable>() : _queue;
+      RejectedExecutionHandler handler = _handler == null ? DEFAULT_HANDLER : _handler;
+
+      // build configured executor
+      return new ThreadPoolExecutor(minThread, maxThread, keepAlive, TimeUnit.MILLISECONDS, queue, handler);
+    }
+
+    public PooledTaskAbseilBuilder queue(BlockingQueue<Runnable> queue) {
+      _queue = queue;
+      return this;
+    }
+
+    public PooledTaskAbseilBuilder rejectHandler(RejectedExecutionHandler handler) {
+      _handler = handler;
+      return this;
+    }
   }
 
   /**
@@ -84,23 +130,44 @@ public abstract class AbseilBuilder {
    * usually work anyway but it useful for testing or when you just need a task executed on a separate thread.
    */
   public static class SingleTaskAbseilBuilder extends AbseilBuilder {
+    private RejectedExecutionHandler _handler;
+    private Long                     _keepAlive;
+
+    private BlockingQueue<Runnable>  _queue;
 
     public SingleTaskAbseilBuilder(long maxRuntime, TimeUnit unit) {
       super(maxRuntime, unit);
     }
 
+    public SingleTaskAbseilBuilder keepAlive(Long time, TimeUnit unit) {
+      assert time >= 0;
+
+      _keepAlive = unit.toMillis(time);
+      return this;
+    }
+
     @Override
-    public ExecutorService getExecutorService() {
-      return new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1),
-          DEFAULT_HANDLER);
+    public ExecutorService newExecutorService() {
+      Long keepAlive = _keepAlive == null ? TimeUnit.SECONDS.toMillis(1) : _keepAlive;
+      BlockingQueue<Runnable> queue = _queue == null ? new LinkedBlockingQueue<Runnable>(1) : _queue;
+      RejectedExecutionHandler handler = _handler == null ? DEFAULT_HANDLER : _handler;
+
+      return new ThreadPoolExecutor(1, 1, keepAlive, TimeUnit.MILLISECONDS, queue, handler);
+    }
+
+    public SingleTaskAbseilBuilder queue(BlockingQueue<Runnable> queue) {
+      _queue = queue;
+      return this;
+    }
+
+    public SingleTaskAbseilBuilder rejectHandler(RejectedExecutionHandler handler) {
+      _handler = handler;
+      return this;
     }
   }
 
   /** This handler will run the task unless the handler has been shut down */
-  private static final RejectedExecutionHandler DEFAULT_HANDLER        = new CallerRunsPolicy();
-
-  /** A reasonable default, wouldn't you say? */
-  private static final Integer                  DEFAULT_MAX_TASK_COUNT = 20;
+  private static final RejectedExecutionHandler DEFAULT_HANDLER = new CallerRunsPolicy();
 
   /**
    * Builder that creates an {@link Abseil} which executes fixed set of tasks and has no timeout.
@@ -175,7 +242,9 @@ public abstract class AbseilBuilder {
 
   private final Long _maxRuntimeMillis;
 
-  AbseilBuilder(long maxRuntime, TimeUnit unit) {
+  protected AbseilBuilder(long maxRuntime, TimeUnit unit) {
+    assert maxRuntime > 0;
+
     _maxRuntimeMillis = unit.toMillis(maxRuntime);
   }
 
@@ -189,17 +258,17 @@ public abstract class AbseilBuilder {
   }
 
   /**
-   * @return an {@link ExecutorService} to be used by the {@link Abseil} to run tasks.
-   */
-  abstract public ExecutorService getExecutorService();
-
-  /**
    * Maximum running time an {@link Abseil} should be allowed to run before timing out and shutting down. Defaults to
    * Long.MAX_VALUE.
    * 
-   * @return maximum running time
+   * @return maximum running time in millis
    */
-  Long getMaxRuntimeMillis() {
+  public Long getMaxRuntime() {
     return _maxRuntimeMillis == null ? Long.MAX_VALUE : _maxRuntimeMillis;
   }
+
+  /**
+   * @return an {@link ExecutorService} to be used by the {@link Abseil} to run tasks.
+   */
+  abstract public ExecutorService newExecutorService();
 }

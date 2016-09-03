@@ -2,13 +2,14 @@ package org.storm.abseil;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.storm.abseil.runnable.RunnableFactory;
+import org.storm.abseil.runnable.RunnableSupplier;
 
 /**
  * <p>
@@ -24,8 +25,10 @@ import org.storm.abseil.runnable.RunnableFactory;
  * @author Timothy Storm
  */
 public class Abseil {
+  private final AtomicInteger _count = new AtomicInteger();
+
   /**
-   * Executes the {@link Runnable}s in the {@link RunnableFactory}
+   * Executes the {@link Runnable}s in the {@link RunnableSupplier}
    */
   private class AbseilTask implements Runnable, RunnableMonitor.Listener {
     /** active tasks, this is not exact but is a best effort answer */
@@ -73,20 +76,18 @@ public class Abseil {
     }
 
     /**
-     * Processes the {@link RunnableFactory} by submitting a new command for each {@link Runnable} of the
-     * {@link RunnableFactory}.
+     * Processes the {@link RunnableSupplier} by submitting a new command for each {@link Runnable} of the
+     * {@link RunnableSupplier}.
      */
     @Override
     public void run() {
       init();
-      if (log.isDebugEnabled()) log.debug("absail running...");
 
       Runnable run = null;
-      while (getState().is(State.RUNNING) && (run = _runnableFactory.build()) != null) {
+      while (getState().is(State.RUNNING) && (run = _runnableFactory.get()) != null) {
         _executor.execute(new RunnableMonitor(run, this));
       }
 
-      if (log.isDebugEnabled()) log.debug("absail shutting down.");
       shutdown(true);
     }
 
@@ -177,7 +178,7 @@ public class Abseil {
   /** abseil process that is run apart from the main thread and can be stopped if the abseil task is unresponsive */
   private Thread              _processor;
 
-  private RunnableFactory     _runnableFactory;
+  private RunnableSupplier    _runnableFactory;
 
   /** time this abseil process started */
   private final AtomicLong    _startAt      = new AtomicLong(Long.MIN_VALUE);
@@ -199,7 +200,7 @@ public class Abseil {
    * @param builder
    */
   public Abseil(AbseilBuilder builder) {
-    this(builder.getExecutorService(), builder.getMaxRuntimeMillis(), TimeUnit.MILLISECONDS);
+    this(builder.newExecutorService(), builder.getMaxRuntime(), TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -214,9 +215,11 @@ public class Abseil {
    *          - of the maxRuntime
    */
   public Abseil(ExecutorService executor, long maxRuntime, TimeUnit unit) {
+    assert maxRuntime > 0;
+
     _maxRuntime = unit.toMillis(maxRuntime);
     _task = new AbseilTask(executor);
-    _processor = new Thread(_task, "Abseil - processor");
+    _processor = new Thread(_task, "Abseil - processor - " + _count.incrementAndGet());
   }
 
   public State getState() {
@@ -241,6 +244,8 @@ public class Abseil {
    * @return this {@link Abseil} for further configuration
    */
   public Abseil maxTimeoutWait(Long time, TimeUnit unit) {
+    assert time >= 0;
+
     _maxWait = unit.toMillis(time);
     return this;
   }
@@ -253,14 +258,16 @@ public class Abseil {
    * @return this this {@link Abseil} for further configuration for further configuration
    */
   public Abseil minTimeoutWait(Long time, TimeUnit unit) {
+    assert time >= 0;
+
     _minWait = unit.toMillis(time);
     return this;
   }
 
   /**
-   * Process the {@link RunnableFactory}
+   * Process the {@link RunnableSupplier}
    */
-  public void process(final RunnableFactory runnableFactory) {
+  public void process(final RunnableSupplier runnableFactory) {
     _runnableFactory = runnableFactory;
 
     _startAt.set(System.currentTimeMillis());

@@ -1,5 +1,7 @@
 package org.storm.abseil.runnable;
 
+import java.util.function.Supplier;
+
 import org.storm.abseil.Abseil;
 
 /**
@@ -8,12 +10,12 @@ import org.storm.abseil.Abseil;
  * @author Timothy Storm
  * @see AbstractRunnableFactory
  */
-public interface RunnableFactory {
+public interface RunnableSupplier extends Supplier<Runnable>{
   /**
    * Creates runnable(s) to be processed by an {@link Abseil}. A null Runnable begins a graceful shutdown of the
    * {@link Abseil}.
    * 
    * @return {@link Runnable} to be executed or null to gracefully shutdown the {@link Abseil}
    */
-  Runnable build();
+  Runnable get();
 }
