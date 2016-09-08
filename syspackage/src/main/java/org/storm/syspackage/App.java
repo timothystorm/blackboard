@@ -7,98 +7,97 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.lang3.StringUtils;
 import org.storm.syspackage.domain.SysPackage;
 import org.storm.syspackage.service.SysPackageService;
 
 public class App {
-  public static void main(String[] args) throws Exception {
-    System.out.println();
+  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [--url] <arg> [-o|--out] <arg> [-h|--help] (PACKAGE_NAMES...)";
+
+  public static void main(String[] args) {
+    System.out.println(StringUtils.center("SysPackage", 80, '-'));
 
     try {
-      // Define
-      CliBuilder cli = new CliBuilder(App.class.getSimpleName()
-          + " (-u|--username) <arg> (-p|--password) password <arg> [--url] <arg> [-h|--help] [PACKAGE_NAMES...]");
+      // define
+      CliBuilder cli = new CliBuilder(USAGE).hasArgs();
       cli.with(cli.opt('h').longOpt("help").desc("This message").build());
       cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
       cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
-      cli.with(cli.opt('o').longOpt("output").desc("file to write results to - defaults to stdout").hasArg().build());
-      cli.with(cli.opt().longOpt("url").desc("DB2 URL to use").hasArg().build());
+      cli.with(cli.opt('o').longOpt("out").desc("file to write results to - defaults to stdout").hasArg().build());
+      cli.with(cli.opt().longOpt("url").desc("DB2 URL to use - defaults to " + Config.DEFAULT_URL).hasArg().build());
       cli.usageWidth(800);
 
       // parse
-      CommandLine command = cli.parse(args);
-      if (command == null) return;
-      if (command.hasOption('h')) cli.usage();
+      CommandLine cmd = cli.parse(args);
+      if (cmd == null || cmd.hasOption('h')) {
+        cli.usage();
+        return;
+      }
 
       // interrogate
-      String username = command.getOptionValue('u');
-      String password = command.getOptionValue('p');
-      String url = command.getOptionValue("url", "jdbc:db2://zos1.freight.fedex.com:446/HRO_DBP1");
-      Set<String> packages = new LinkedHashSet<>(command.getArgList());
-
-      // verify
-      if (packages.isEmpty()) cli.usage();
+      String username = cmd.getOptionValue('u');
+      String password = cmd.getOptionValue('p');
+      String url = cmd.getOptionValue("url");
+      Collection<String> packages = cmd.getArgList();
 
       // configure
       Config config = new Config(username, password, url);
-      SysPackageService service = config.sysPackageService();
+      SysPackageService svc = config.sysPackageService();
 
       // execute
-      try (PrintWriter writer = newPrintWriter(command.getOptionValue('o'))) {
-        for (String pkg : packages) {
-          Collection<SysPackage> sysPackages = service.getPackagesFor(pkg);
-          write(sysPackages, writer);
-        }
+      try (PrintWriter writer = newPrintWriter(cmd.getOptionValue('o'))) {
+        packages.stream().distinct().forEach((pkg) -> write(svc.getPackages(pkg), writer));
       }
-
-      System.out.println();
     } catch (Exception e) {
       e.printStackTrace(System.err);
-      System.exit(-1);
+    } finally {
+      System.out.println(StringUtils.repeat('-', 80));
     }
   }
 
   /**
-   * Creates a new PrintWriter for the file path. If filePath
+   * Creates a new PrintWriter for the file path. If filePath is null then stdout is used
    * 
    * @param filePath
-   * @return
+   * @return PrintWriter instance
    */
   private static PrintWriter newPrintWriter(String filePath) {
     try {
-      PrintWriter writer = null;
-      if (filePath == null) writer = new PrintWriter(System.out);
-      else {
-        Path path = Paths.get(filePath).normalize().toAbsolutePath();
-        writer = new PrintWriter(path.toFile());
-      }
-      return writer;
+      if (filePath == null) return new PrintWriter(System.out);
+
+      Path path = Paths.get(filePath).normalize().toAbsolutePath();
+      return new PrintWriter(path.toFile());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
+  /**
+   * Writes the sysPackages to the writer
+   * 
+   * @param sysPackages
+   * @param writer
+   */
   private static void write(Collection<SysPackage> sysPackages, PrintWriter writer) {
-    StringBuilder str = new StringBuilder();
-
     // writer header
-    str.append("package,").append("qualifier,").append("table").append(LF);
+    writer.write("package,");
+    writer.write("qualifier,");
+    writer.write("table");
+    writer.write(LF);
 
+    // write rows
     sysPackages.forEach((sysPack) -> {
       sysPack.getPackages().forEach((qualifier, tables) -> {
         tables.forEach((table) -> {
-          str.append(escapeCsv(sysPack.getName())).append(",");
-          str.append(escapeCsv(qualifier)).append(",");
-          str.append(escapeCsv(table)).append(LF);
+          writer.write(escapeCsv(sysPack.getName()) + ",");
+          writer.write(escapeCsv(qualifier) + ",");
+          writer.write(escapeCsv(table) + LF);
         });
       });
     });
 
-    writer.write(str.toString());
     writer.flush();
   }
 }

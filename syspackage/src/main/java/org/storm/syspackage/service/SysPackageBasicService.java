@@ -18,7 +18,7 @@ public class SysPackageBasicService implements SysPackageService {
    * @see org.storm.syspackage.service.SysPackageService#getPackagesFor(java.util.List)
    */
   @Override
-  public Collection<SysPackage> getPackagesFor(String packageName) {
+  public Collection<SysPackage> getPackages(String packageName) {
     if (packageName == null || packageName.isEmpty()) return Collections.emptyList();
     return _dao.find(packageName);
   }

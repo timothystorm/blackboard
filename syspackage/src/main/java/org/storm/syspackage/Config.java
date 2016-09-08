@@ -16,7 +16,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * Poor man's DI
  */
 public class Config {
-  private static final String DEFAULT_URL  = "jdbc:db2://zos1.freight.fedex.com:446/HRO_DBP1";
+  public static final String DEFAULT_URL  = "jdbc:db2://zos1.freight.fedex.com:446/HRO_DBP1";
 
   private static final String DRIVER_CLASS = "com.ibm.db2.jcc.DB2Driver";
 

@@ -41,6 +41,14 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
     tables.add(tableName);
   }
 
+  @Override
+  public int compareTo(SysPackage other) {
+    CompareToBuilder compare = new CompareToBuilder();
+    compare.append(getName(), other.getName());
+    compare.append(getPackages(), other.getPackages());
+    return compare.toComparison();
+  }
+
   public String getName() {
     return _name;
   }
@@ -104,13 +112,5 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
     str.append("name", getName());
     str.append("packages", getPackages());
     return str.toString();
-  }
-
-  @Override
-  public int compareTo(SysPackage other) {
-    CompareToBuilder compare = new CompareToBuilder();
-    compare.append(getName(), other.getName());
-    compare.append(getPackages(), other.getPackages());
-    return compare.toComparison();
   }
 }

@@ -26,6 +26,8 @@ public class CliBuilder {
   /** Normally set internally but can be overridden if you want to customize how the usage message is displayed */
   private HelpFormatter     _formatter       = new HelpFormatter();
 
+  private boolean           _hasArgs;
+
   /** Optional additional message for usage; displayed after the usage summary but before the options are displayed */
   private String            _header;
 
@@ -111,6 +113,15 @@ public class CliBuilder {
     return this;
   }
 
+  public CliBuilder hasArgs() {
+    return hasArgs(true);
+  }
+
+  public CliBuilder hasArgs(boolean hasArgs) {
+    _hasArgs = hasArgs;
+    return this;
+  }
+
   /**
    * Sets the header that shows after usage message but before options
    * 
@@ -161,10 +172,16 @@ public class CliBuilder {
   public CommandLine parse(String[] args) {
     if (_parser == null) _parser = new DefaultParser();
     try {
-      return _parser.parse(_options, args, _stopOnNonOption);
+      CommandLine cmd = _parser.parse(_options, args, _stopOnNonOption);
+      
+      // check for command line args
+      if (_hasArgs && cmd.getArgs().length <= 0){
+        throw new ParseException("Missing required argument(s)");
+      }
+      
+      return cmd;
     } catch (ParseException e) {
       _writer.println("error: " + e.getMessage());
-      usage();
       return null;
     }
   }
