@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>
- * Wrapper around org.apche.commons.cli that keeps the different parts together and is simpler and succinct
+ * Wrapper around org.apche.commons.cli that keeps the different parts together which makes its use more succinct
  * </p>
  * 
  * @author Timothy Storm
@@ -173,12 +173,10 @@ public class CliBuilder {
     if (_parser == null) _parser = new DefaultParser();
     try {
       CommandLine cmd = _parser.parse(_options, args, _stopOnNonOption);
-      
+
       // check for command line args
-      if (_hasArgs && cmd.getArgs().length <= 0){
-        throw new ParseException("Missing required argument(s)");
-      }
-      
+      if (_hasArgs && cmd.getArgs().length <= 0) { throw new ParseException("Missing required argument(s)"); }
+
       return cmd;
     } catch (ParseException e) {
       _writer.println("error: " + e.getMessage());
