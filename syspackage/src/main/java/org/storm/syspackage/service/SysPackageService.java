@@ -1,11 +1,9 @@
 package org.storm.syspackage.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.storm.syspackage.domain.SysPackage;
 
 public interface SysPackageService {
-
-  List<SysPackage> getPackagesFor(List<String> packageNames);
-
+  Collection<SysPackage> getPackagesFor(String packageName);
 }

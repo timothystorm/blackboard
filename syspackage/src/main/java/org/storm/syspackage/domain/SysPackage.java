@@ -27,7 +27,12 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
   public SysPackage() {}
 
   public SysPackage(String name) {
-    _name = name;
+    setName(name);
+  }
+  
+  public SysPackage(String name, String tableName, String qualifier){
+    setName(name);
+    addTable(tableName, qualifier);
   }
 
   public void addTable(String tableName, String qualifier) {
