@@ -56,7 +56,7 @@
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.2</version>
 		</dependency>
-<!--  
+  
 		<dependency>
 			<groupId>com.ibm.db2</groupId>
 			<artifactId>db2jcc4</artifactId>
@@ -67,7 +67,7 @@
 			<artifactId>db2jcc_license_cu</artifactId>
 			<version>1.4.2</version>
 		</dependency>
--->
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
