@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.LF;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
@@ -13,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.storm.syspackage.domain.SysPackage;
 import org.storm.syspackage.service.SysPackageService;
 
-public class App {
+public class SysPackageApp {
   private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [--url] <arg> [-o|--out] <arg> [-h|--help] (PACKAGE_NAMES...)";
 
   public static void main(String[] args) {
@@ -26,7 +27,8 @@ public class App {
       cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
       cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
       cli.with(cli.opt('o').longOpt("out").desc("file to write results to - defaults to stdout").hasArg().build());
-      cli.with(cli.opt().longOpt("url").desc("DB2 URL to use - defaults to " + Config.DEFAULT_URL).hasArg().build());
+      cli.with(
+          cli.opt().longOpt("url").desc("DB2 URL to use - defaults to " + SysAppConfig.DEFAULT_URL).hasArg().build());
       cli.usageWidth(800);
 
       // parse
@@ -43,7 +45,7 @@ public class App {
       Collection<String> packages = cmd.getArgList();
 
       // configure
-      Config config = new Config(username, password, url);
+      SysAppConfig config = new SysAppConfig(username, password, url);
       SysPackageService svc = config.sysPackageService();
 
       // execute
@@ -81,19 +83,14 @@ public class App {
    * @param writer
    */
   private static void write(Collection<SysPackage> sysPackages, PrintWriter writer) {
-    // writer header
-    writer.write("package,");
-    writer.write("qualifier,");
-    writer.write("table");
-    writer.write(LF);
-
-    // write rows
     sysPackages.forEach((sysPack) -> {
       sysPack.getPackages().forEach((qualifier, tables) -> {
         tables.forEach((table) -> {
-          writer.write(escapeCsv(sysPack.getName()) + ",");
-          writer.write(escapeCsv(qualifier) + ",");
-          writer.write(escapeCsv(table) + LF);
+          writer.write(escapeCsv(sysPack.getName()) + ',');
+          writer.write(escapeCsv(table) + ',');
+          writer.write(escapeCsv(qualifier) + ',');
+          writer.write(escapeCsv(sysPack.getContoken()) + ',');
+          writer.write(escapeCsv(sysPack.getLastUsed().format(DateTimeFormatter.ISO_DATE)) + LF);
         });
       });
     });

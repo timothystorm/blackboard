@@ -115,7 +115,7 @@
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 							<addClasspath>true</addClasspath>
-							<mainClass>org.storm.syspackage.App</mainClass>
+							<mainClass>org.storm.syspackage.SysPackageApp</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -152,7 +152,7 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>org.storm.syspackage.App</mainClass>
+							<mainClass>org.storm.syspackage.SysPackageApp</mainClass>
 							<id>syspack</id>
 						</program>
 					</programs>

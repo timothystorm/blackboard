@@ -2,6 +2,7 @@ package org.storm.syspackage.domain;
 
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,8 +19,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ * Contains the elements of a SysPackage bind information
+ * 
+ * @author Timothy Storm
+ */
 public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String, List<String>>> {
-  private String                    _name;
+  private LocalDate                 _lastUsed;
+  private String                    _name, _contoken;
 
   // key: qualifier, value:tables
   private Map<String, List<String>> _packages = new LinkedHashMap<>();
@@ -29,8 +36,8 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
   public SysPackage(String name) {
     setName(name);
   }
-  
-  public SysPackage(String name, String tableName, String qualifier){
+
+  public SysPackage(String name, String tableName, String qualifier) {
     setName(name);
     addTable(tableName, qualifier);
   }
@@ -46,7 +53,17 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
     CompareToBuilder compare = new CompareToBuilder();
     compare.append(getName(), other.getName());
     compare.append(getPackages(), other.getPackages());
+    compare.append(getContoken(), other.getContoken());
+    compare.append(getLastUsed(), other.getLastUsed());
     return compare.toComparison();
+  }
+
+  public String getContoken() {
+    return _contoken;
+  }
+
+  public LocalDate getLastUsed() {
+    return _lastUsed;
   }
 
   public String getName() {
@@ -102,6 +119,14 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
     return getPackages().entrySet().iterator();
   }
 
+  public void setContoken(String contoken) {
+    _contoken = contoken;
+  }
+
+  public void setLastUsed(LocalDate lastUsed) {
+    _lastUsed = lastUsed;
+  }
+
   public void setName(String name) {
     _name = name;
   }
@@ -111,6 +136,8 @@ public class SysPackage implements Comparable<SysPackage>, Iterable<Entry<String
     ToStringBuilder str = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
     str.append("name", getName());
     str.append("packages", getPackages());
+    str.append("contoken", getContoken());
+    str.append("lastUsed", getLastUsed());
     return str.toString();
   }
 }

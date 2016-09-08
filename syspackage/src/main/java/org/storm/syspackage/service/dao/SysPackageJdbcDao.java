@@ -17,10 +17,10 @@ public class SysPackageJdbcDao implements SysPackageDao {
 
   private static final String WILDCARD = "%";
 
-  private static final String QUERY    = "SELECT DISTINCT a.dname, a.bname, a.bqualifier " + "FROM sysibm.syspackdep a "
-      + "JOIN sysibm.syspackage b " + "ON a.dlocation = b.location " + "AND a.dcollid = b.collid "
-      + "AND a.dcontoken = b.contoken " + "WHERE a.dlocation = ' ' " + "AND a.btype = 'T' "
-      + "AND a.dtype IN(' ', 'N', 'T', 'F') " + "AND a.dname LIKE(?) " + "AND b.lastused > CURRENT_DATE - 1 YEAR ";
+  private static final String QUERY    = "SELECT a.dname AS bind_name, a.bname AS table_name, b.qualifier, b.lastused, b.contoken "
+      + "FROM sysibm.syspackdep a JOIN sysibm.syspackage b "
+      + "ON a.dlocation = b.location AND a.dcollid = b.collid AND a.dcontoken = b.contoken "
+      + "WHERE a.dlocation = ' ' AND a.btype = 'T' AND a.dtype IN(' ', 'N', 'T', 'F') AND a.dname LIKE(?) AND b.lastused >= CURRENT_DATE - 1 YEAR ";
 
   public SysPackageJdbcDao(DataSource dataSource) {
     _dataSource = dataSource;
@@ -36,11 +36,12 @@ public class SysPackageJdbcDao implements SysPackageDao {
       ResultSet rs = stmt.executeQuery();
 
       while (rs.next()) {
-        String name = rs.getString("dname");
+        String name = rs.getString("bind_name");
 
-        SysPackage sysPackage = packages.get(name);
-        if (sysPackage == null) packages.put(name, (sysPackage = new SysPackage(name)));
-        sysPackage.addTable(rs.getString("bname"), rs.getString("bqualifier"));
+        SysPackage sysPackage = packages.computeIfAbsent(name, n -> new SysPackage(n));
+        sysPackage.addTable(rs.getString("table_name"), rs.getString("qualifier"));
+        sysPackage.setLastUsed(rs.getDate("lastused").toLocalDate());
+        sysPackage.setContoken(rs.getString("contoken"));
       }
 
       return packages.values();

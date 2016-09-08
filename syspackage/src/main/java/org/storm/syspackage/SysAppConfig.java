@@ -15,7 +15,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 /**
  * Poor man's DI
  */
-public class Config {
+public class SysAppConfig {
   public static final String DEFAULT_URL  = "jdbc:db2://zos1.freight.fedex.com:446/HRO_DBP1";
 
   private static final String DRIVER_CLASS = "com.ibm.db2.jcc.DB2Driver";
@@ -30,11 +30,7 @@ public class Config {
 
   private final String        _username, _password, _url;
 
-  public Config(String username, String password) {
-    this(username, password, null);
-  }
-
-  public Config(String username, String password, String url) {
+  public SysAppConfig(String username, String password, String url) {
     _username = username;
     _password = password;
     _url = url == null ? DEFAULT_URL : url;
