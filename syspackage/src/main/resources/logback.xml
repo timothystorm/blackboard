@@ -8,7 +8,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.storm.syspackage" level="INFO" additivity="false">
+  <logger name="org.storm.syspack" level="INFO" additivity="false">
    <appender-ref ref="STDOUT" />
   </logger>
 

@@ -1,4 +1,4 @@
-package org.storm.syspackage;
+package org.storm.syspack;
 
 import java.io.PrintWriter;
 

@@ -1,38 +1,42 @@
-package org.storm.syspackage.domain;
-
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
-import org.apache.commons.collections4.multimap.UnmodifiableMultiValuedMap;
-import org.apache.commons.lang3.builder.*;
+package org.storm.syspack.domain;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * Contains the elements of a SysPackage bind information
+ * Contains the elements of a bind package
  *
  * @author Timothy Storm
  */
-public class SysPackage implements Comparable<SysPackage> {
-  private LocalDate _lastUsed;
-  private String    _name, _contoken;
+public class BindPackage implements Comparable<BindPackage> {
+  private LocalDate   _lastUsed;
+  private String      _name, _contoken;
 
-  // key: qualifier, value:tables
-  private MultiValuedMap<String, String> _tables = new HashSetValuedHashMap<>();
+  /** unique tables used in the bind package */
+  private Set<String> _tables = new LinkedHashSet<>();
 
-  public SysPackage addTable(String tableName, String qualifier) {
-    _tables.put(qualifier, tableName);
+  public BindPackage addTable(String tableName) {
+    _tables.add(tableName);
     return this;
   }
 
-  public SysPackage() {}
+  public BindPackage() {}
 
-  public SysPackage(String name) {
+  public BindPackage(String name) {
     setName(name);
   }
 
   @Override
-  public int compareTo(SysPackage other) {
+  public int compareTo(BindPackage other) {
     CompareToBuilder compare = new CompareToBuilder();
     compare.append(getName(), other.getName());
     compare.append(getTables(), other.getTables());
@@ -65,8 +69,8 @@ public class SysPackage implements Comparable<SysPackage> {
     _name = name;
   }
 
-  public MultiValuedMap<String, String> getTables() {
-    return UnmodifiableMultiValuedMap.unmodifiableMultiValuedMap(_tables);
+  public Collection<String> getTables() {
+    return Collections.unmodifiableCollection(_tables);
   }
 
   @Override
@@ -82,10 +86,10 @@ public class SysPackage implements Comparable<SysPackage> {
   @Override
   public boolean equals(Object obj) {
     if (obj == null) return false;
-    if (!(obj instanceof SysPackage)) return false;
+    if (!(obj instanceof BindPackage)) return false;
     if (obj == this) return true;
 
-    SysPackage other = (SysPackage) obj;
+    BindPackage other = (BindPackage) obj;
     EqualsBuilder equals = new EqualsBuilder();
     equals.append(getName(), other.getName());
     equals.append(getTables(), other.getTables());
@@ -102,13 +106,5 @@ public class SysPackage implements Comparable<SysPackage> {
     str.append("contoken", getContoken());
     str.append("lastUsed", getLastUsed());
     return str.toString();
-  }
-
-  public Collection<String> getQualifiers() {
-    return _tables.keySet();
-  }
-
-  public Collection<String> getTablesFor(String qualifier) {
-    return _tables.get(qualifier);
   }
 }
