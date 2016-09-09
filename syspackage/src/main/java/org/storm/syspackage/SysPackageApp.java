@@ -2,8 +2,6 @@ package org.storm.syspackage;
 
 import static java.lang.String.format;
 import static java.time.LocalDateTime.now;
-import static org.apache.commons.lang3.StringEscapeUtils.escapeCsv;
-import static org.apache.commons.lang3.StringUtils.LF;
 
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -65,7 +63,7 @@ public class SysPackageApp {
 
   /**
    * Creates a new PrintWriter for the file path. If filePath is null then stdout is used
-   * 
+   *
    * @param filePath
    * @return PrintWriter instance
    */
@@ -82,7 +80,7 @@ public class SysPackageApp {
 
   /**
    * Writes the sysPackages to the writer
-   * 
+   *
    * @param sysPackages
    * @param csv
    */

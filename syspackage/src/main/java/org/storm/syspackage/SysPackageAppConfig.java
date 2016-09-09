@@ -1,36 +1,36 @@
 package org.storm.syspackage;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.sql.DataSource;
-
-import org.storm.syspackage.service.SysPackageBasicService;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.storm.syspackage.domain.SysPackage;
 import org.storm.syspackage.service.SysPackageService;
 import org.storm.syspackage.service.dao.SysPackageDao;
 import org.storm.syspackage.service.dao.SysPackageJdbcDao;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Poor man's DI
  */
-public class SysAppConfig {
-  public static final String DEFAULT_URL  = "jdbc:db2://zos1.freight.fedex.com:446/HRO_DBP1";
+public class SysPackageAppConfig {
+  public static final String DEFAULT_URL = "jdbc:db2://zos1.freight.fedex.com:446/HRO_DBP1";
 
   private static final String DRIVER_CLASS = "com.ibm.db2.jcc.DB2Driver";
 
-  private SysPackageDao       _dao;
+  private SysPackageDao _dao;
 
-  private DataSource          _dataSource;
+  private DataSource _dataSource;
 
-  private Lock                _lock        = new ReentrantLock();
+  private Lock _lock = new ReentrantLock();
 
-  private SysPackageService   _service;
+  private SysPackageService _service;
 
-  private final String        _username, _password, _url;
+  private final String _username, _password, _url;
 
-  public SysAppConfig(String username, String password, String url) {
+  public SysPackageAppConfig(String username, String password, String url) {
     _username = username;
     _password = password;
     _url = url == null ? DEFAULT_URL : url;
@@ -77,7 +77,14 @@ public class SysAppConfig {
       _lock.lock();
 
       try {
-        if (_service == null) _service = new SysPackageBasicService(sysPackageDao());
+//        if (_service == null) _service = new SysPackageBasicService(sysPackageDao());
+        if (_service == null) {
+          _service = new SysPackageService() {
+            public Collection<SysPackage> getPackages(String... packageName) {
+              return Arrays.asList(new SysPackage[]{new SysPackage(packageName[0]).addTable("TABLE", "TST")});
+            }
+          };
+        }
       } finally {
         _lock.unlock();
       }

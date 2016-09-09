@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SysPackageJdbcDao implements SysPackageDao {
-  private final DataSource    _dataSource;
+  private final DataSource _dataSource;
 
   private static final String WILDCARD = "%";
 

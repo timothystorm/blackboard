@@ -10,12 +10,12 @@ import java.util.Collection;
 
 /**
  * Contains the elements of a SysPackage bind information
- * 
+ *
  * @author Timothy Storm
  */
 public class SysPackage implements Comparable<SysPackage> {
-  private LocalDate                       _lastUsed;
-  private String                          _name, _contoken;
+  private LocalDate _lastUsed;
+  private String    _name, _contoken;
 
   // key: qualifier, value:tables
   private MultiValuedMap<String, String> _tables = new HashSetValuedHashMap<>();
