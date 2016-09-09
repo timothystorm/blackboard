@@ -18,21 +18,27 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @author Timothy Storm
  */
 public class BindPackage implements Comparable<BindPackage> {
-  private LocalDate   _lastUsed;
-  private String      _name, _contoken;
+  private LocalDate    _lastUsed;
+  private final String _name;
+  private String       _contoken;
 
   /** unique tables used in the bind package */
-  private Set<String> _tables = new LinkedHashSet<>();
+  private Set<String>  _tables = new LinkedHashSet<>();
 
+  public BindPackage(String name) {
+    _name = name;
+  }
+
+  /**
+   * Adds a table if it isn't already part of the package
+   * 
+   * @param tableName
+   *          - to be added
+   * @return this {@link BindPackage} for further configuration
+   */
   public BindPackage addTable(String tableName) {
     _tables.add(tableName);
     return this;
-  }
-
-  public BindPackage() {}
-
-  public BindPackage(String name) {
-    setName(name);
   }
 
   @Override
@@ -45,28 +51,31 @@ public class BindPackage implements Comparable<BindPackage> {
     return compare.toComparison();
   }
 
-  public String getContoken() {
-    return _contoken;
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) return false;
+    if (!(obj instanceof BindPackage)) return false;
+    if (obj == this) return true;
+
+    BindPackage other = (BindPackage) obj;
+    EqualsBuilder equals = new EqualsBuilder();
+    equals.append(getName(), other.getName());
+    equals.append(getTables(), other.getTables());
+    equals.append(getContoken(), other.getContoken());
+    equals.append(getLastUsed(), other.getLastUsed());
+    return equals.isEquals();
   }
 
-  public void setContoken(String contoken) {
-    _contoken = contoken;
+  public String getContoken() {
+    return _contoken;
   }
 
   public LocalDate getLastUsed() {
     return _lastUsed;
   }
 
-  public void setLastUsed(LocalDate lastUsed) {
-    _lastUsed = lastUsed;
-  }
-
   public String getName() {
     return _name;
-  }
-
-  public void setName(String name) {
-    _name = name;
   }
 
   public Collection<String> getTables() {
@@ -83,19 +92,12 @@ public class BindPackage implements Comparable<BindPackage> {
     return hash.toHashCode();
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (!(obj instanceof BindPackage)) return false;
-    if (obj == this) return true;
+  public void setContoken(String contoken) {
+    _contoken = contoken;
+  }
 
-    BindPackage other = (BindPackage) obj;
-    EqualsBuilder equals = new EqualsBuilder();
-    equals.append(getName(), other.getName());
-    equals.append(getTables(), other.getTables());
-    equals.append(getContoken(), other.getContoken());
-    equals.append(getLastUsed(), other.getLastUsed());
-    return equals.isEquals();
+  public void setLastUsed(LocalDate lastUsed) {
+    _lastUsed = lastUsed;
   }
 
   @Override

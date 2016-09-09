@@ -14,25 +14,56 @@ import javax.sql.DataSource;
 import org.storm.syspack.domain.BindPackage;
 
 public class BindPackageJdbcDao implements BindPackageDao {
-  private final DataSource    _dataSource;
+  private final DataSource       _dataSource;
 
-  private static final String WILDCARD = "%";
+  private static final String    WILDCARD = "%";
 
-  private static final Long   YEARS    = 3L;
+  private static final Long      YEARS    = 3L;
 
-  private static final String QUERY    = "SELECT DISTINCT a.dname AS package_name, a.bname AS table_name, b.lastused, b.contoken "
-      + "FROM sysibm.syspackdep a JOIN sysibm.syspackage b "
-      + "ON a.dlocation = b.location AND a.dcollid = b.collid AND a.dcontoken = b.contoken "
-      + "WHERE a.dlocation = ' ' AND a.btype = 'T' AND a.dtype IN(' ', 'N', 'T', 'F') AND a.dname LIKE(?) AND b.lastused >= CURRENT_DATE - ? YEAR ";
+  /** singleton - do not access directory instead use {@link #query()} */
+  private static volatile String QUERY;
 
   public BindPackageJdbcDao(DataSource dataSource) {
     _dataSource = dataSource;
   }
 
+  private void assertPackagePattern(final String pattern) {
+    if (pattern == null || pattern
+        .isEmpty()) { throw new IllegalArgumentException("package pattern required but was '" + pattern + "'"); }
+  }
+
+  private String query() {
+    if (QUERY == null) {
+      synchronized (BindPackageJdbcDao.class) {
+        if (QUERY == null) {
+          StringBuilder sql = new StringBuilder();
+          sql.append("SELECT DISTINCT ");
+          sql.append("a.dname AS package_name, ");
+          sql.append("a.bname AS table_name, ");
+          sql.append("b.lastused, b.contoken ");
+          sql.append("FROM sysibm.syspackdep a ");
+          sql.append("JOIN sysibm.syspackage b ");
+          sql.append("ON a.dlocation = b.location ");
+          sql.append("AND a.dcollid = b.collid ");
+          sql.append("AND a.dcontoken = b.contoken ");
+          sql.append("WHERE a.dlocation = ' ' ");
+          sql.append("AND a.btype = 'T' ");
+          sql.append("AND a.dtype IN(' ', 'N', 'T', 'F') ");
+          sql.append("AND a.dname LIKE(?) "); // 1
+          sql.append("AND b.lastused >= CURRENT_DATE - ? YEAR "); // 2
+          QUERY = sql.toString();
+        }
+      }
+    }
+    return QUERY;
+  }
+
   @Override
-  public Collection<BindPackage> find(final String packagePattern) {
-    try (Connection conn = _dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(QUERY)) {
-      stmt.setString(1, WILDCARD + packagePattern + WILDCARD);
+  public Collection<BindPackage> find(final String pattern) {
+    assertPackagePattern(pattern);
+
+    try (Connection conn = _dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(query())) {
+      stmt.setString(1, pattern + WILDCARD);
       stmt.setLong(2, YEARS);
       ResultSet rs = stmt.executeQuery();
 
@@ -51,7 +82,7 @@ public class BindPackageJdbcDao implements BindPackageDao {
           return bp;
         }).addTable(rs.getString("table_name"));
 
-        // capture the newest bind used
+        // use the newest bind parameters
         if (lastUsed.isAfter(bindPack.getLastUsed())) {
           bindPack.setLastUsed(lastUsed);
           bindPack.setContoken(contoken);
