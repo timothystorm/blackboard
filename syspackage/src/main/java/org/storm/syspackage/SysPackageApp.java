@@ -1,8 +1,5 @@
 package org.storm.syspackage;
 
-import static org.apache.commons.lang3.StringEscapeUtils.escapeCsv;
-import static org.apache.commons.lang3.StringUtils.LF;
-
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,11 +11,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.storm.syspackage.domain.SysPackage;
 import org.storm.syspackage.service.SysPackageService;
 
+import com.opencsv.CSVWriter;
+
 public class SysPackageApp {
   private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [--url] <arg> [-o|--out] <arg> [-h|--help] (PACKAGE_NAMES...)";
 
   public static void main(String[] args) {
-    System.out.println(StringUtils.center("SysPackage", 80, '-'));
+    System.out.println();
 
     try {
       // define
@@ -27,8 +26,8 @@ public class SysPackageApp {
       cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
       cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
       cli.with(cli.opt('o').longOpt("out").desc("file to write results to - defaults to stdout").hasArg().build());
-      cli.with(
-          cli.opt().longOpt("url").desc("DB2 URL to use - defaults to " + SysAppConfig.DEFAULT_URL).hasArg().build());
+      cli.with(cli.opt().longOpt("url").desc("DB2 URL to use - defaults to " + SysPackageAppConfig.DEFAULT_URL).hasArg()
+          .build());
       cli.usageWidth(800);
 
       // parse
@@ -45,12 +44,13 @@ public class SysPackageApp {
       Collection<String> packages = cmd.getArgList();
 
       // configure
-      SysAppConfig config = new SysAppConfig(username, password, url);
+      SysPackageAppConfig config = new SysPackageAppConfig(username, password, url);
       SysPackageService svc = config.sysPackageService();
 
       // execute
-      try (PrintWriter writer = newPrintWriter(cmd.getOptionValue('o'))) {
-        packages.stream().distinct().forEach((pkg) -> write(svc.getPackages(pkg), writer));
+      PrintWriter writer = newPrintWriter(cmd.getOptionValue('o'));
+      try (CSVWriter csv = new CSVWriter(writer)) {
+        packages.stream().distinct().forEach((pkg) -> write(svc.getPackages(pkg), csv));
       }
     } catch (Exception e) {
       e.printStackTrace(System.err);
@@ -61,7 +61,7 @@ public class SysPackageApp {
 
   /**
    * Creates a new PrintWriter for the file path. If filePath is null then stdout is used
-   * 
+   *
    * @param filePath
    * @return PrintWriter instance
    */
@@ -78,23 +78,21 @@ public class SysPackageApp {
 
   /**
    * Writes the sysPackages to the writer
-   * 
+   *
    * @param sysPackages
-   * @param writer
+   * @param csv
    */
-  private static void write(Collection<SysPackage> sysPackages, PrintWriter writer) {
-    sysPackages.forEach((sysPack) -> {
-      sysPack.getPackages().forEach((qualifier, tables) -> {
-        tables.forEach((table) -> {
-          writer.write(escapeCsv(sysPack.getName()) + ',');
-          writer.write(escapeCsv(table) + ',');
-          writer.write(escapeCsv(qualifier) + ',');
-          writer.write(escapeCsv(sysPack.getContoken()) + ',');
-          writer.write(escapeCsv(sysPack.getLastUsed().format(DateTimeFormatter.ISO_DATE)) + LF);
+  private static void write(Collection<SysPackage> sysPackages, CSVWriter csv) {
+    for (SysPackage sysPack : sysPackages) {
+      sysPack.getQualifiers().forEach(qualifier -> {
+        sysPack.getTablesFor(qualifier).forEach(table -> {
+          String name = sysPack.getName();
+          String contoken = sysPack.getContoken() == null ? "" : sysPack.getContoken();
+          String lastUsed = sysPack.getLastUsed() == null ? ""
+              : sysPack.getLastUsed().format(DateTimeFormatter.ISO_DATE);
+          csv.writeNext(new String[] { name, table, qualifier, contoken, lastUsed });
         });
       });
-    });
-
-    writer.flush();
+    }
   }
 }

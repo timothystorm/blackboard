@@ -1,56 +1,66 @@
 package org.storm.syspackage;
 
-import java.io.PrintWriter;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.PrintWriter;
 
 /**
  * <p>
  * Wrapper around org.apche.commons.cli that keeps the different parts together which makes its use more succinct
  * </p>
- * 
+ *
  * @author Timothy Storm
  */
 public class CliBuilder {
 
-  /** Optional additional message for usage; displayed after the options are displayed */
-  private String            _footer;
+  /**
+   * Optional additional message for usage; displayed after the options are displayed
+   */
+  private String _footer;
 
-  /** Normally set internally but can be overridden if you want to customize how the usage message is displayed */
-  private HelpFormatter     _formatter       = new HelpFormatter();
+  /**
+   * Normally set internally but can be overridden if you want to customize how the usage message is displayed
+   */
+  private HelpFormatter _formatter = new HelpFormatter();
 
-  private boolean           _hasArgs;
+  private boolean _hasArgs;
 
-  /** Optional additional message for usage; displayed after the usage summary but before the options are displayed */
-  private String            _header;
+  /**
+   * Optional additional message for usage; displayed after the usage summary but before the options are displayed
+   */
+  private String _header;
 
-  /** Underlying options */
-  private Options           _options         = new Options();
+  /**
+   * Underlying options
+   */
+  private Options _options = new Options();
 
-  /** Allows you full customization of the underlying processing engine */
+  /**
+   * Allows you full customization of the underlying processing engine
+   */
   private CommandLineParser _parser;
 
   /**
    * Indicates that option processing should continue for all arguments even if arguments not recognized as options are
    * encountered (default true)
    */
-  private Boolean           _stopOnNonOption = true;
+  private Boolean _stopOnNonOption = true;
 
-  /** Usage summary displayed as the first line when {@link #usage()} is called */
-  private String            _usage;
+  /**
+   * Usage summary displayed as the first line when {@link #usage()} is called
+   */
+  private String _usage;
 
-  /** Allows customization of the usage message width */
-  private Integer           _width           = _formatter.getWidth();
+  /**
+   * Allows customization of the usage message width
+   */
+  private Integer _width = _formatter.getWidth();
 
-  /** Defaults to stdout but a different PrintWriter can be provided */
-  private PrintWriter       _writer          = new PrintWriter(System.out);
+  /**
+   * Defaults to stdout but a different PrintWriter can be provided
+   */
+  private PrintWriter _writer = new PrintWriter(System.out);
 
   /**
    * Creates a cli with configurable items defaulted
@@ -61,7 +71,7 @@ public class CliBuilder {
 
   /**
    * Creates a cli with the usage set and all other configurable items defaulted
-   * 
+   *
    * @param usage
    */
   public CliBuilder(String usage) {
@@ -70,7 +80,7 @@ public class CliBuilder {
 
   /**
    * Creates a cli with the usage and header set and all other configurable items defaulted
-   * 
+   *
    * @param usage
    * @param header
    */
@@ -80,7 +90,7 @@ public class CliBuilder {
 
   /**
    * Creates a cli with the usage, header and footer set and all other configurable items defaulted
-   * 
+   *
    * @param usage
    * @param header
    * @param footer
@@ -93,7 +103,7 @@ public class CliBuilder {
 
   /**
    * Sets the footer that shows after usage options
-   * 
+   *
    * @param footer
    * @return this builder for further configuration
    */
@@ -104,7 +114,7 @@ public class CliBuilder {
 
   /**
    * Customize the formatter used to generate usage messages
-   * 
+   *
    * @param formatter
    * @return this builder for further configuration
    */
@@ -124,7 +134,7 @@ public class CliBuilder {
 
   /**
    * Sets the header that shows after usage message but before options
-   * 
+   *
    * @param header
    * @return this builder for further configuration
    */
@@ -135,7 +145,7 @@ public class CliBuilder {
 
   /**
    * Returns a Builder to create an Option using descriptive methods
-   * 
+   *
    * @return Option.Builder
    */
   public Option.Builder opt() {
@@ -144,7 +154,7 @@ public class CliBuilder {
 
   /**
    * Returns a Builder to create an Option using descriptive methods.
-   * 
+   *
    * @param opt
    * @return Option.Builder
    */
@@ -154,7 +164,7 @@ public class CliBuilder {
 
   /**
    * Returns a Builder to create an Option using descriptive methods.
-   * 
+   *
    * @param opt
    * @return Option.Builder
    */
@@ -164,9 +174,8 @@ public class CliBuilder {
 
   /**
    * Make options accessible from command line args with parser.
-   * 
-   * @param args
-   *          to parse
+   *
+   * @param args to parse
    * @return Parsed {@link CommandLine} or null on bad command lines after displaying usage message.
    */
   public CommandLine parse(String[] args) {
@@ -175,7 +184,9 @@ public class CliBuilder {
       CommandLine cmd = _parser.parse(_options, args, _stopOnNonOption);
 
       // check for command line args
-      if (_hasArgs && cmd.getArgs().length <= 0) { throw new ParseException("Missing required argument(s)"); }
+      if (_hasArgs && cmd.getArgs().length <= 0) {
+        throw new ParseException("Missing required argument(s)");
+      }
 
       return cmd;
     } catch (ParseException e) {
@@ -186,7 +197,7 @@ public class CliBuilder {
 
   /**
    * Sets the underlying parse engine
-   * 
+   *
    * @param parser
    * @return this builder for further configuration
    */
@@ -198,7 +209,7 @@ public class CliBuilder {
   /**
    * Specifies if option processing should continue for all arguments even if arguments not recognized as options are
    * encountered (default true)
-   * 
+   *
    * @param stopOnNonOption
    * @return this builder for further configuration
    */
@@ -209,18 +220,17 @@ public class CliBuilder {
 
   /**
    * Prints out the usage message to the writer
-   * 
+   *
    * @see #writer(PrintWriter)
    */
   public void usage() {
-    _formatter.printHelp(_writer, _width, _usage, _header, _options, _formatter.getLeftPadding(),
-        _formatter.getDescPadding(), _footer);
+    _formatter.printHelp(_writer, _width, _usage, _header, _options, _formatter.getLeftPadding(), _formatter.getDescPadding(), _footer);
     _writer.flush();
   }
 
   /**
    * Sets the usage message
-   * 
+   *
    * @param usage
    * @return this builder for further configuration
    */
@@ -231,7 +241,7 @@ public class CliBuilder {
 
   /**
    * Specify the {@link #usage()} width
-   * 
+   *
    * @param width
    * @return this builder for further configuration
    */
@@ -242,7 +252,7 @@ public class CliBuilder {
 
   /**
    * Add 1-* {@link Option}s to this cli for parsing
-   * 
+   *
    * @param opts
    * @return this builder for further configuration
    */
@@ -256,7 +266,7 @@ public class CliBuilder {
 
   /**
    * Set writer used for {@link #usage()}
-   * 
+   *
    * @param writer
    * @return this builder for further configuration
    */
