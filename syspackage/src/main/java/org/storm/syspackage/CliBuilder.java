@@ -1,15 +1,9 @@
 package org.storm.syspackage;
 
-import java.io.PrintWriter;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.PrintWriter;
 
 /**
  * <p>
@@ -20,21 +14,31 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class CliBuilder {
 
-  /** Optional additional message for usage; displayed after the options are displayed */
+  /**
+   * Optional additional message for usage; displayed after the options are displayed
+   */
   private String            _footer;
 
-  /** Normally set internally but can be overridden if you want to customize how the usage message is displayed */
+  /**
+   * Normally set internally but can be overridden if you want to customize how the usage message is displayed
+   */
   private HelpFormatter     _formatter       = new HelpFormatter();
 
   private boolean           _hasArgs;
 
-  /** Optional additional message for usage; displayed after the usage summary but before the options are displayed */
+  /**
+   * Optional additional message for usage; displayed after the usage summary but before the options are displayed
+   */
   private String            _header;
 
-  /** Underlying options */
+  /**
+   * Underlying options
+   */
   private Options           _options         = new Options();
 
-  /** Allows you full customization of the underlying processing engine */
+  /**
+   * Allows you full customization of the underlying processing engine
+   */
   private CommandLineParser _parser;
 
   /**
@@ -43,13 +47,19 @@ public class CliBuilder {
    */
   private Boolean           _stopOnNonOption = true;
 
-  /** Usage summary displayed as the first line when {@link #usage()} is called */
+  /**
+   * Usage summary displayed as the first line when {@link #usage()} is called
+   */
   private String            _usage;
 
-  /** Allows customization of the usage message width */
+  /**
+   * Allows customization of the usage message width
+   */
   private Integer           _width           = _formatter.getWidth();
 
-  /** Defaults to stdout but a different PrintWriter can be provided */
+  /**
+   * Defaults to stdout but a different PrintWriter can be provided
+   */
   private PrintWriter       _writer          = new PrintWriter(System.out);
 
   /**
@@ -165,8 +175,7 @@ public class CliBuilder {
   /**
    * Make options accessible from command line args with parser.
    * 
-   * @param args
-   *          to parse
+   * @param args to parse
    * @return Parsed {@link CommandLine} or null on bad command lines after displaying usage message.
    */
   public CommandLine parse(String[] args) {
@@ -175,7 +184,9 @@ public class CliBuilder {
       CommandLine cmd = _parser.parse(_options, args, _stopOnNonOption);
 
       // check for command line args
-      if (_hasArgs && cmd.getArgs().length <= 0) { throw new ParseException("Missing required argument(s)"); }
+      if (_hasArgs && cmd.getArgs().length <= 0) {
+        throw new ParseException("Missing required argument(s)");
+      }
 
       return cmd;
     } catch (ParseException e) {
@@ -213,8 +224,7 @@ public class CliBuilder {
    * @see #writer(PrintWriter)
    */
   public void usage() {
-    _formatter.printHelp(_writer, _width, _usage, _header, _options, _formatter.getLeftPadding(),
-        _formatter.getDescPadding(), _footer);
+    _formatter.printHelp(_writer, _width, _usage, _header, _options, _formatter.getLeftPadding(), _formatter.getDescPadding(), _footer);
     _writer.flush();
   }
 

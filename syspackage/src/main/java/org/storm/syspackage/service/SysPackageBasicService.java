@@ -1,10 +1,9 @@
 package org.storm.syspackage.service;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.storm.syspackage.domain.SysPackage;
 import org.storm.syspackage.service.dao.SysPackageDao;
+
+import java.util.*;
 
 public class SysPackageBasicService implements SysPackageService {
   private final SysPackageDao _dao;
@@ -18,8 +17,12 @@ public class SysPackageBasicService implements SysPackageService {
    * @see org.storm.syspackage.service.SysPackageService#getPackagesFor(java.util.List)
    */
   @Override
-  public Collection<SysPackage> getPackages(String packageName) {
-    if (packageName == null || packageName.isEmpty()) return Collections.emptyList();
-    return _dao.find(packageName);
+  public Collection<SysPackage> getPackages(String... packageName) {
+    if (packageName == null || packageName.length <= 0) return Collections.emptyList();
+    Set<SysPackage> packages = new HashSet<>();
+    Arrays.stream(packageName).forEach(name -> {
+      packages.add(_dao.find(name));
+    });
+    return packages;
   }
 }
