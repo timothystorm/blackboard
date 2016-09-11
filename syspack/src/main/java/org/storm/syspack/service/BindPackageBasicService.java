@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 
+import org.springframework.stereotype.Service;
+import org.storm.syspack.dao.BindPackageDao;
 import org.storm.syspack.domain.BindPackage;
-import org.storm.syspack.service.dao.BindPackageDao;
 
+@Service
 public class BindPackageBasicService implements BindPackageService {
   private final BindPackageDao _dao;
 

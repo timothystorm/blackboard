@@ -1,4 +1,4 @@
-package org.storm.syspack.service.dao;
+package org.storm.syspack.dao;
 
 import java.util.Collection;
 

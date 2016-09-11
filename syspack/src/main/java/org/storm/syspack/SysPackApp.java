@@ -9,6 +9,8 @@ import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.service.BindPackageService;
 
@@ -21,9 +23,10 @@ import com.opencsv.CSVWriter;
  */
 public class SysPackApp implements Runnable {
   private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [--url] <arg> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
-  
+
   public static void main(String[] args) throws Exception {
     new Thread(new SysPackApp(args), "SysPack").start();
+
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         System.out.println(String.format("\n%s", StringUtils.center("SysPack", 100, '-')));
@@ -64,10 +67,28 @@ public class SysPackApp implements Runnable {
     }
   }
 
-  private final CommandLine   _cmd;
+  private final CommandLine        _cmd;
+  private final String             _dir;
+  private final String[]           _packages;
+  private final BindPackageService _service;
+  private final ApplicationContext _cntx;
 
   private SysPackApp(String[] args) {
+    // define and parse
     _cmd = parse(define(), args);
+
+    // interrogate
+    _dir = _cmd.getOptionValue('d');
+    _packages = _cmd.getArgs();
+
+    // populate registry
+    Registry.setUsername(_cmd.getOptionValue('u'));
+    Registry.setPassword(_cmd.getOptionValue('p'));
+    Registry.setDb2Url(_cmd.getOptionValue("url"));
+
+    // setup context
+    _cntx = new AnnotationConfigApplicationContext(Config.class);
+    _service = _cntx.getBean(BindPackageService.class);
   }
 
   /**
@@ -81,8 +102,7 @@ public class SysPackApp implements Runnable {
     cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
     cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
     cli.with(cli.opt('d').longOpt("directory").desc("Specify where to place generated csv files").hasArg().build());
-    cli.with(
-        cli.opt().longOpt("url").desc("DB2 URL to use - defaults to " + SysPackAppConfig.DEFAULT_URL).hasArg().build());
+    cli.with(cli.opt().longOpt("url").desc("DB2 URL to use").hasArg().build());
     cli.usageWidth(800);
     return cli;
   }
@@ -109,22 +129,14 @@ public class SysPackApp implements Runnable {
   @Override
   public void run() {
     try {
-      // extract option values
-      String username = _cmd.getOptionValue('u');
-      String password = _cmd.getOptionValue('p');
-      String url = _cmd.getOptionValue("url");
-      String dir = _cmd.getOptionValue('d');
-      String[] packages = _cmd.getArgs();
-
-      // configure
-      SysPackAppConfig config = new SysPackAppConfig(username, password, url);
-      BindPackageService svc = config.sysPackageService();
-
       // execute
-      PrintWriter writer = newPrintWriter(dir, "syspack.csv");
+      PrintWriter writer = newPrintWriter(_dir, "syspack.csv");
       try (CSVWriter csv = new CSVWriter(writer)) {
-        Arrays.stream(packages).distinct().forEach((pkg) -> {
-          write(svc.getPackages(pkg), csv);
+        Arrays.stream(_packages).distinct().forEach((pkg) -> {
+          Collection<BindPackage> bindPackages = _service.getPackages(pkg);
+          write(bindPackages, csv);
+
+          // stop if the user requests
           if (Thread.currentThread().isInterrupted()) return;
         });
       }

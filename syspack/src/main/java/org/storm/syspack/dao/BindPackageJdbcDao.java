@@ -1,21 +1,22 @@
-package org.storm.syspack.service.dao;
+package org.storm.syspack.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.stereotype.Repository;
 import org.storm.syspack.domain.BindPackage;
 
-public class BindPackageJdbcDao implements BindPackageDao {
-  private final DataSource       _dataSource;
-
+@Repository
+public class BindPackageJdbcDao extends JdbcDaoSupport implements BindPackageDao {
   private static final String    WILDCARD = "%";
 
   private static final Long      YEARS    = 3L;
@@ -23,8 +24,8 @@ public class BindPackageJdbcDao implements BindPackageDao {
   /** singleton - do not access directory instead use {@link #query()} */
   private static volatile String QUERY;
 
-  public BindPackageJdbcDao(DataSource dataSource) {
-    _dataSource = dataSource;
+  public BindPackageJdbcDao(final JdbcTemplate template) {
+    setJdbcTemplate(template);
   }
 
   private void assertPackagePattern(final String pattern) {
@@ -62,14 +63,15 @@ public class BindPackageJdbcDao implements BindPackageDao {
   public Collection<BindPackage> find(final String pattern) {
     assertPackagePattern(pattern);
 
-    try (Connection conn = _dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(query())) {
-      stmt.setString(1, pattern + WILDCARD);
-      stmt.setLong(2, YEARS);
-      ResultSet rs = stmt.executeQuery();
+    // setup input params
+    List<Object> params = new ArrayList<>();
+    params.add(pattern + WILDCARD);
+    params.add(YEARS);
 
-      Map<String, BindPackage> bindPacks = new LinkedHashMap<>();
-      while (rs.next()) {
-        // capture results
+    // query and build response
+    final Map<String, BindPackage> bindPacks = new LinkedHashMap<>();
+    getJdbcTemplate().query(query(), params.toArray(), new RowCallbackHandler() {
+      public void processRow(ResultSet rs) throws SQLException {
         String packageName = rs.getString("package_name");
         String contoken = rs.getString("contoken");
         LocalDate lastUsed = rs.getDate("lastused").toLocalDate();
@@ -88,10 +90,8 @@ public class BindPackageJdbcDao implements BindPackageDao {
           bindPack.setContoken(contoken);
         }
       }
+    });
 
-      return bindPacks.values();
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
+    return bindPacks.values();
   }
 }
