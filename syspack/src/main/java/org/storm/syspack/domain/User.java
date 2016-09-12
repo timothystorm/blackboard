@@ -2,6 +2,8 @@ package org.storm.syspack.domain;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -12,60 +14,20 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 /**
  * Holds the key attributes of FXF tables [uuid, phone, account]
  */
-public class User {
-  private String             _uuid;
-  private Phone              _phone;
+public class User implements Iterable<String> {
   private Collection<String> _accounts = new TreeSet<>();
-
-  public void setUuid(String uuid) {
-    _uuid = uuid;
-  }
-
-  public void setPhone(Phone phone) {
-    _phone = phone;
-  }
-
-  public void setAccounts(String... accounts) {
-    setAccounts(Arrays.asList(accounts));
-  }
-
-  public void setAccounts(Collection<String> accounts) {
-    _accounts.clear();
-    _accounts.addAll(accounts);
+  private Phone              _phone;
+  private String             _uuid, _username;
+  
+  public User(){}
+  
+  public User(String uuid){
+    setUuid(uuid);
   }
 
   public User addAccount(String... accounts) {
     Arrays.stream(accounts).forEach(a -> _accounts.add(a));
     return this;
-  }
-
-  public String getUuid() {
-    return _uuid;
-  }
-
-  public Phone getPhone() {
-    return _phone;
-  }
-
-  public String[] getAccount() {
-    return _accounts.toArray(new String[_accounts.size()]);
-  }
-
-  public String toString() {
-    ToStringBuilder str = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
-    str.append("uuid", getUuid());
-    str.append("phone", getPhone());
-    str.append("account", getAccount());
-    return str.toString();
-  }
-
-  @Override
-  public int hashCode() {
-    HashCodeBuilder hash = new HashCodeBuilder(17, 31);
-    hash.append(getUuid());
-    hash.append(getPhone());
-    hash.append(getAccount());
-    return hash.toHashCode();
   }
 
   @Override
@@ -76,9 +38,71 @@ public class User {
 
     User other = (User) obj;
     EqualsBuilder equals = new EqualsBuilder();
+    equals.append(getUsername(), other.getUsername());
     equals.append(getUuid(), other.getUuid());
     equals.append(getPhone(), other.getPhone());
-    equals.append(getAccount(), other.getAccount());
+    equals.append(getAccounts(), other.getAccounts());
     return equals.isEquals();
+  }
+
+  public Collection<String> getAccounts() {
+    return Collections.unmodifiableCollection(_accounts);
+  }
+
+  public Phone getPhone() {
+    return _phone;
+  }
+
+  public String getUsername() {
+    return _username;
+  }
+
+  public String getUuid() {
+    return _uuid;
+  }
+
+  @Override
+  public int hashCode() {
+    HashCodeBuilder hash = new HashCodeBuilder(17, 31);
+    hash.append(getUsername());
+    hash.append(getUuid());
+    hash.append(getPhone());
+    hash.append(getAccounts());
+    return hash.toHashCode();
+  }
+
+  @Override
+  public Iterator<String> iterator() {
+    return getAccounts().iterator();
+  }
+
+  public void setAccounts(Collection<String> accounts) {
+    _accounts.clear();
+    _accounts.addAll(accounts);
+  }
+
+  public void setAccounts(String... accounts) {
+    setAccounts(Arrays.asList(accounts));
+  }
+
+  public void setPhone(Phone phone) {
+    _phone = phone;
+  }
+
+  public void setUsername(String username) {
+    _username = username;
+  }
+
+  public void setUuid(String uuid) {
+    _uuid = uuid;
+  }
+
+  public String toString() {
+    ToStringBuilder str = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
+    str.append("username", getUsername());
+    str.append("uuid", getUuid());
+    str.append("phone", getPhone());
+    str.append("accounts", getAccounts());
+    return str.toString();
   }
 }

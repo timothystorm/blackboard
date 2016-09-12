@@ -3,7 +3,6 @@ package org.storm.syspack;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -12,9 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.storm.syspack.domain.BindPackage;
+import org.storm.syspack.io.BindPackageCsvWriter;
 import org.storm.syspack.service.BindPackageService;
-
-import com.opencsv.CSVWriter;
 
 /**
  * CLI utility to find tables associated with bind packages
@@ -47,23 +45,6 @@ public class SysPackApp implements Runnable {
       return new PrintWriter(path.toFile());
     } catch (Exception e) {
       throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Writes the sysPackages to the writer
-   *
-   * @param sysPackages
-   * @param csv
-   */
-  private static void write(Collection<BindPackage> sysPackages, CSVWriter csv) {
-    for (BindPackage sysPack : sysPackages) {
-      sysPack.getTables().forEach(table -> {
-        String name = sysPack.getName();
-        String contoken = sysPack.getContoken() == null ? "" : sysPack.getContoken();
-        String lastUsed = sysPack.getLastUsed() == null ? "" : sysPack.getLastUsed().format(DateTimeFormatter.ISO_DATE);
-        csv.writeNext(new String[] { name, table, contoken, lastUsed });
-      });
     }
   }
 
@@ -108,8 +89,7 @@ public class SysPackApp implements Runnable {
   }
 
   /**
-   * Parses the command line options. If the parsing fails or the user select "help" this will show usage and exit the
-   * VM.
+   * Parses the command line options. If the parsing fails or the user select "help" this will show usage and exit
    * 
    * @param cli
    *          - to parse the args with
@@ -131,12 +111,12 @@ public class SysPackApp implements Runnable {
     try {
       // execute
       PrintWriter writer = newPrintWriter(_dir, "syspack.csv");
-      try (CSVWriter csv = new CSVWriter(writer)) {
+      try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
         Arrays.stream(_packages).distinct().forEach((pkg) -> {
           Collection<BindPackage> bindPackages = _service.getPackages(pkg);
-          write(bindPackages, csv);
+          csv.write(bindPackages);
 
-          // stop if the user requests
+          // stop if user interrupts
           if (Thread.currentThread().isInterrupted()) return;
         });
       }

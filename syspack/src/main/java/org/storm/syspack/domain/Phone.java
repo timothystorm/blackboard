@@ -31,7 +31,7 @@ public class Phone {
     return Double.valueOf(_number);
   }
 
-  public String getNumberString() {
+  public String getValue() {
     return PHONE_FORMATTER.format(_number);
   }
 
@@ -49,6 +49,6 @@ public class Phone {
   }
 
   public String toString() {
-    return new ToStringBuilder(this, ToStringStyle.JSON_STYLE).append("phone", getNumberString()).toString();
+    return new ToStringBuilder(this, ToStringStyle.JSON_STYLE).append("phone", getValue()).toString();
   }
 }

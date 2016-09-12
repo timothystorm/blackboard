@@ -181,6 +181,10 @@
 							<mainClass>org.storm.syspack.SysPackApp</mainClass>
 							<id>syspack</id>
 						</program>
+						<program>
+							<mainClass>org.storm.syspack.DataFinderApp</mainClass>
+							<id>datafinder</id>
+						</program>
 					</programs>
 				</configuration>
 			</plugin>

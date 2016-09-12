@@ -1,6 +1,7 @@
 package org.storm.syspack.domain;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -18,12 +19,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @author Timothy Storm
  */
 public class BindPackage implements Comparable<BindPackage> {
-  private LocalDate    _lastUsed;
-  private final String _name;
-  private String       _contoken;
+  public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_DATE;
+  private String                        _contoken;
+  private LocalDate                     _lastUsed;
+  private final String                  _name;
 
   /** unique tables used in the bind package */
-  private Set<String>  _tables = new LinkedHashSet<>();
+  private Set<String>                   _tables        = new LinkedHashSet<>();
 
   public BindPackage(String name) {
     _name = name;
@@ -74,6 +76,15 @@ public class BindPackage implements Comparable<BindPackage> {
     return _lastUsed;
   }
 
+  public String getLastUsed(DateTimeFormatter dateFormatter) {
+    if (_lastUsed == null || dateFormatter == null) return null;
+    return _lastUsed.format(dateFormatter);
+  }
+
+  public String getLastUsedString() {
+    return getLastUsed(DATE_FORMATTER);
+  }
+
   public String getName() {
     return _name;
   }
@@ -98,6 +109,15 @@ public class BindPackage implements Comparable<BindPackage> {
 
   public void setLastUsed(LocalDate lastUsed) {
     _lastUsed = lastUsed;
+  }
+
+  public void setLastUsed(String lastUsed) {
+    setLastUsed(lastUsed, DATE_FORMATTER);
+  }
+
+  public void setLastUsed(String lastUsed, DateTimeFormatter dateFormatter) {
+    if (lastUsed == null || dateFormatter == null) return;
+    _lastUsed = LocalDate.parse(lastUsed, dateFormatter);
   }
 
   @Override

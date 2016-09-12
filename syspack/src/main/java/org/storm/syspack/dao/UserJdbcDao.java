@@ -10,7 +10,7 @@ public class UserJdbcDao extends JdbcDaoSupport implements UserDao {
   }
 
   @Override
-  public User find(String userId) {
+  public User read(String username) {
     return null;
   }
 }
