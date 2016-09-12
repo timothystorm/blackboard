@@ -16,10 +16,10 @@ public class Registry {
                                                                return new HashMap<String, Object>();
                                                              };
                                                            };
-  private static final String                     DB2URL   = "DB2URL";
+  private static final String                     DB2LEVEL   = "DB2LEVEL";
   private static final String                     PASSWORD = "PASSWORD";
   private static final String                     USERNAME = "USERNAME";
-
+  
   /**
    * Get an arbitrary value that was added via {@link #put(String, Object)}
    * 
@@ -32,12 +32,12 @@ public class Registry {
   }
 
   /**
-   * Gets the DB2 url set with {@link #setDb2Url(String)}
+   * Gets the DB2 level
    * 
-   * @return DB2 url or null if not set
+   * @return DB2 level or null if not set
    */
-  public static String getDb2Url() {
-    return get(DB2URL);
+  public static Level getDb2Level() {
+    return get(DB2LEVEL);
   }
 
   /**
@@ -69,12 +69,12 @@ public class Registry {
   }
 
   /**
-   * Sets the user's desired DB2 URL which dictates what DB or region to use for database calls
+   * Sets the user's desired DB2 level which dictates what DB or region to use for database calls
    * 
-   * @param db2Url
+   * @param db2Level
    */
-  public static void setDb2Url(String db2Url) {
-    put(DB2URL, db2Url);
+  public static void setDb2Level(Level db2Level) {
+    put(DB2LEVEL, db2Level);
   }
 
   /**

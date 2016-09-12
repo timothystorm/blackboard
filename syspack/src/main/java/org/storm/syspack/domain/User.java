@@ -1,11 +1,13 @@
 package org.storm.syspack.domain;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -14,7 +16,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 /**
  * Holds the key attributes of FXF tables [uuid, phone, account]
  */
-public class User implements Iterable<String> {
+public class User implements Comparable<User>, Iterable<String>, Serializable {
+  private static final long serialVersionUID = -1501361777896630821L;
   private Collection<String> _accounts = new TreeSet<>();
   private Phone              _phone;
   private String             _uuid, _username;
@@ -28,6 +31,15 @@ public class User implements Iterable<String> {
   public User addAccount(String... accounts) {
     Arrays.stream(accounts).forEach(a -> _accounts.add(a));
     return this;
+  }
+
+  @Override
+  public int compareTo(User other) {
+    CompareToBuilder compare = new CompareToBuilder();
+    compare.append(getUsername(), other.getUsername());
+    compare.append(getUuid(), other.getUuid());
+    compare.append(getPhone(), other.getPhone());
+    return compare.toComparison();
   }
 
   @Override

@@ -1,8 +1,7 @@
 package org.storm.syspack;
 
+import java.io.File;
 import java.io.PrintWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -20,7 +19,7 @@ import org.storm.syspack.service.BindPackageService;
  * @author Timothy Storm
  */
 public class SysPackApp implements Runnable {
-  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [--url] <arg> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
+  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
 
   public static void main(String[] args) throws Exception {
     new Thread(new SysPackApp(args), "SysPack").start();
@@ -41,8 +40,13 @@ public class SysPackApp implements Runnable {
   private static PrintWriter newPrintWriter(String filePath, String fileName) {
     try {
       if (filePath == null) return new PrintWriter(System.out);
-      Path path = Paths.get(filePath, fileName).normalize().toAbsolutePath();
-      return new PrintWriter(path.toFile());
+
+      // prepare the path/file
+      File file = new File(filePath, fileName);
+      if (file.getParentFile() != null) file.getParentFile().mkdirs();
+      file.createNewFile();
+
+      return new PrintWriter(file);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -65,7 +69,9 @@ public class SysPackApp implements Runnable {
     // populate registry
     Registry.setUsername(_cmd.getOptionValue('u'));
     Registry.setPassword(_cmd.getOptionValue('p'));
-    Registry.setDb2Url(_cmd.getOptionValue("url"));
+    
+    Level level = Level.toLevel(_cmd.getOptionValue('l'));
+    Registry.setDb2Level(level == null ? Level.L3 : level);
 
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
@@ -83,7 +89,7 @@ public class SysPackApp implements Runnable {
     cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
     cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
     cli.with(cli.opt('d').longOpt("directory").desc("Specify where to place generated csv files").hasArg().build());
-    cli.with(cli.opt().longOpt("url").desc("DB2 URL to use").hasArg().build());
+    cli.with(cli.opt('l').longOpt("level").desc("DB2 level to execute queries").hasArg().build());
     cli.usageWidth(800);
     return cli;
   }
@@ -110,7 +116,7 @@ public class SysPackApp implements Runnable {
   public void run() {
     try {
       // execute
-      PrintWriter writer = newPrintWriter(_dir, "syspack.csv");
+      PrintWriter writer = newPrintWriter(_dir, "bindpacks.csv");
       try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
         Arrays.stream(_packages).distinct().forEach((pkg) -> {
           Collection<BindPackage> bindPackages = _service.getPackages(pkg);

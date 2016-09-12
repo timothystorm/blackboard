@@ -7,13 +7,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.storm.syspack.dao.UserDao;
@@ -22,10 +21,11 @@ import org.storm.syspack.dao.fxf.FxfDaoFactory;
 import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.domain.User;
 import org.storm.syspack.io.BindPackageCsvReader;
-import org.storm.syspack.io.TableCsvWriter;
+
+import com.opencsv.CSVWriter;
 
 public class DataFinderApp implements Runnable {
-  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [--url] <arg> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
+  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
 
   public static void main(String[] args) throws Exception {
     new Thread(new DataFinderApp(args), "DataFinder").start();
@@ -56,7 +56,9 @@ public class DataFinderApp implements Runnable {
     // populate registry
     Registry.setUsername(_cmd.getOptionValue('u'));
     Registry.setPassword(_cmd.getOptionValue('p'));
-    Registry.setDb2Url(_cmd.getOptionValue("url"));
+
+    Level level = Level.toLevel(_cmd.getOptionValue('l'));
+    Registry.setDb2Level(level == null ? Level.L3 : level);
 
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
@@ -75,8 +77,8 @@ public class DataFinderApp implements Runnable {
     cli.with(cli.opt('u').longOpt("username").desc("RACF").hasArg().required().build());
     cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").hasArg().required().build());
     cli.with(cli.opt('d').longOpt("directory").desc("Specify where to place generated csv files").hasArg().build());
+    cli.with(cli.opt('l').longOpt("level").desc("DB2 level to execute queries").hasArg().build());
     cli.with(cli.opt().longOpt("bindpacks").desc("BindPacks file").hasArg().required().build());
-    cli.with(cli.opt().longOpt("url").desc("DB2 URL to use").hasArg().build());
     cli.usageWidth(800);
     return cli;
   }
@@ -111,7 +113,7 @@ public class DataFinderApp implements Runnable {
       FileReader reader = new FileReader(_bindPackFilePath);
       try (BindPackageCsvReader csvReader = new BindPackageCsvReader(reader)) {
         bindPackages = csvReader.read();
-      } 
+      }
 
       // extract unique tables from bind packages
       final Set<String> uniqueTables = new LinkedHashSet<>();
@@ -120,26 +122,38 @@ public class DataFinderApp implements Runnable {
       });
 
       // iterate tables
+//      uniqueTables.stream().forEach(table -> {
       uniqueTables.parallelStream().forEach(table -> {
         try {
           // create dao for the FXF table
           FxfDao fxfDao = _fxfDaoFactory.getFxfDao(table);
 
-          // find all users data from the table
-          List<Map<String, Object>> data = fxfDao.read(users);
-
           // write table data
-          FileWriter writer = new FileWriter(new File(_dir, table + ".csv"));
-          try (TableCsvWriter csvWriter = new TableCsvWriter(writer)) {
-            System.out.println("writing data for '" + table + "'");
-            csvWriter.write(data, true);
+          FileWriter writer = newFileWriter(_dir, table + ".csv");
+          try (CSVWriter csvWriter = new CSVWriter(writer)) {
+            fxfDao.loadTo(users, csvWriter);
           }
+        } catch(NoSuchBeanDefinitionException e){
+          System.err.println(e.getMessage());
         } catch (IOException e) {
           e.printStackTrace(System.err);
         }
       });
     } catch (IOException e) {
       e.printStackTrace(System.err);
+    }
+  }
+
+  private FileWriter newFileWriter(String dir, String fileName) {
+    try {
+      // prepare the path/file
+      File file = new File(dir, fileName);
+      if (file.getParentFile() != null) file.getParentFile().mkdirs();
+      file.createNewFile();
+
+      return new FileWriter(file);
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
     }
   }
 }

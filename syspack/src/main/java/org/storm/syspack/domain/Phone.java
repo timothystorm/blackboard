@@ -1,14 +1,17 @@
 package org.storm.syspack.domain;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-public class Phone {
+public class Phone implements Comparable<Phone>, Serializable {
+  private static final long serialVersionUID = -426774465884835494L;
   private static final NumberFormat PHONE_FORMATTER = new DecimalFormat("0000000000");
   private Double                    _number;
 
@@ -50,5 +53,12 @@ public class Phone {
 
   public String toString() {
     return new ToStringBuilder(this, ToStringStyle.JSON_STYLE).append("phone", getValue()).toString();
+  }
+  
+  @Override
+  public int compareTo(Phone other) {
+    CompareToBuilder compare = new CompareToBuilder();
+    compare.append(getNumber(), other.getNumber());
+    return compare.toComparison();
   }
 }
