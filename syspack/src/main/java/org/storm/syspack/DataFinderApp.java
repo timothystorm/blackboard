@@ -103,7 +103,7 @@ public class DataFinderApp implements Runnable {
   public void run() {
     try {
       // iterate each user login
-      Set<User> users = new ConcurrentSkipListSet<>();
+      Collection<User> users = new ConcurrentSkipListSet<>();
       Arrays.stream(_usernames).forEach(name -> users.add(_userDao.read(name)));
 
       // load bind packages
