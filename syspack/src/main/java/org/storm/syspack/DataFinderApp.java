@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.StringUtils;
@@ -103,7 +103,7 @@ public class DataFinderApp implements Runnable {
   public void run() {
     try {
       // iterate each user login
-      List<User> users = new ArrayList<>();
+      Set<User> users = new ConcurrentSkipListSet<>();
       Arrays.stream(_usernames).forEach(name -> users.add(_userDao.read(name)));
 
       // load bind packages
