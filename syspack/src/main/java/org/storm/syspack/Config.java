@@ -68,7 +68,7 @@ public class Config {
   }
 
   @Bean
-  public ServiceLocatorFactoryBean fxfDaoServiceFactoryBean() {
+  public ServiceLocatorFactoryBean serviceLocatorFactoryBean() {
     ServiceLocatorFactoryBean bean = new ServiceLocatorFactoryBean();
     bean.setServiceLocatorInterface(FxfDaoFactory.class);
     return bean;

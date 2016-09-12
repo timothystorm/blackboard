@@ -40,9 +40,9 @@ public class DataFinderApp implements Runnable {
   private final CommandLine        _cmd;
   private final ApplicationContext _cntx;
   private final String             _dir, _bindPackFilePath;
-  private final String[]           _usernames;
   private final FxfDaoFactory      _fxfDaoFactory;
   private final UserDao            _userDao;
+  private final String[]           _usernames;
 
   private DataFinderApp(String[] args) {
     // define and parse
@@ -50,7 +50,7 @@ public class DataFinderApp implements Runnable {
 
     // interrogate
     _dir = _cmd.getOptionValue('d');
-    _bindPackFilePath = _cmd.getOptionValue("bindpack");
+    _bindPackFilePath = _cmd.getOptionValue("bindpacks");
     _usernames = _cmd.getArgs();
 
     // populate registry
@@ -122,6 +122,7 @@ public class DataFinderApp implements Runnable {
       // iterate tables
       uniqueTables.parallelStream().forEach(table -> {
         try {
+          // create dao for the FXF table
           FxfDao fxfDao = _fxfDaoFactory.getFxfDao(table);
 
           // find all users data from the table
@@ -130,6 +131,7 @@ public class DataFinderApp implements Runnable {
           // write table data
           FileWriter writer = new FileWriter(new File(_dir, table + ".csv"));
           try (TableCsvWriter csvWriter = new TableCsvWriter(writer)) {
+            System.out.println("writing data for '" + table + "'");
             csvWriter.write(data, true);
           }
         } catch (IOException e) {
