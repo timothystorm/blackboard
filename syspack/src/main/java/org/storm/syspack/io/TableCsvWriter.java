@@ -24,6 +24,7 @@ public class TableCsvWriter implements Closeable {
       if (!headerWritten && includeHeader) {
         Set<String> columnNames = row.keySet();
         _csv.writeNext(columnNames.toArray(new String[columnNames.size()]));
+        headerWritten = true;
       }
 
       List<String> values = row.values().stream().map(v -> {
