@@ -7,15 +7,22 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.storm.syspack.domain.BindPackage;
 
+import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 
 public class BindPackageCsvReader implements Closeable {
+  protected Logger        _log = LoggerFactory.getLogger(getClass());
+
   private final CSVReader _csv;
 
   public BindPackageCsvReader(Reader reader) {
-    _csv = new CSVReader(reader);
+    assert reader != null;
+
+    _csv = new CSVReader(reader, CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER, 1);
   }
 
   public Collection<BindPackage> read() {
@@ -30,8 +37,10 @@ public class BindPackageCsvReader implements Closeable {
         bindPack.setContoken(getValue(line, 2, null));
         bindPack.setLastUsed(getValue(line, 3, null));
         bindPack.addTable(getValue(line, 1, null));
-      } 
-    } catch (IOException ignore) {}
+      }
+    } catch (IOException ioe) {
+      _log.error("BindPackage read failed", ioe);
+    }
 
     return bindPacks.values();
   }

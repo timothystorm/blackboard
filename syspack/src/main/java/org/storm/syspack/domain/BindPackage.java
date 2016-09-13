@@ -62,7 +62,7 @@ public class BindPackage implements Comparable<BindPackage> {
     BindPackage other = (BindPackage) obj;
     EqualsBuilder equals = new EqualsBuilder();
     equals.append(getName(), other.getName());
-    equals.append(getTables(), other.getTables());
+    equals.append(getTablesInternal(), other.getTablesInternal());
     equals.append(getContoken(), other.getContoken());
     equals.append(getLastUsed(), other.getLastUsed());
     return equals.isEquals();
@@ -93,11 +93,15 @@ public class BindPackage implements Comparable<BindPackage> {
     return Collections.unmodifiableCollection(_tables);
   }
 
+  private Collection<String> getTablesInternal() {
+    return _tables;
+  }
+
   @Override
   public int hashCode() {
     HashCodeBuilder hash = new HashCodeBuilder(7, 31);
     hash.append(getName());
-    hash.append(getTables());
+    hash.append(getTablesInternal());
     hash.append(getContoken());
     hash.append(getLastUsed());
     return hash.toHashCode();
@@ -124,7 +128,7 @@ public class BindPackage implements Comparable<BindPackage> {
   public String toString() {
     ToStringBuilder str = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
     str.append("name", getName());
-    str.append("tables", getTables());
+    str.append("tables", getTablesInternal());
     str.append("contoken", getContoken());
     str.append("lastUsed", getLastUsed());
     return str.toString();

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.storm.syspack.domain.BindPackage;
 
@@ -16,21 +17,29 @@ import com.opencsv.CSVWriter;
  * @see BindPackageCsvReader
  */
 public class BindPackageCsvWriter implements Closeable {
-  private final CSVWriter _csv;
+  private final CSVWriter     _csv;
+  private final AtomicBoolean _headerWritten = new AtomicBoolean(false);
 
   public BindPackageCsvWriter(Writer writer) {
+    assert writer != null;
     _csv = new CSVWriter(writer);
   }
 
   public void write(Collection<BindPackage> bindPackages) {
     if (bindPackages == null || bindPackages.isEmpty()) return;
 
+    // write header
+    if (!_headerWritten.get()) {
+      _headerWritten.set(true);
+      _csv.writeNext(new String[] { "BIND_NAME", "TABLE", "CONTOKEN", "LAST_USED" });
+    }
+
+    // write rows
     for (BindPackage bindPack : bindPackages) {
       String name = bindPack.getName();
       String contoken = bindPack.getContoken() == null ? "" : bindPack.getContoken();
       String lastUsed = bindPack.getLastUsedString() == null ? "" : bindPack.getLastUsedString();
 
-      // write tables of the bind package
       bindPack.getTables().forEach(table -> {
         _csv.writeNext(new String[] { name, table, contoken, lastUsed });
       });
