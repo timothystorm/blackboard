@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("ECOM_CUST_PROFILE")
-public class EcomCustProfile extends AbstractFxfPhoneParamDao {
+public class EcomCustProfile extends FxfPhoneDao {
 
   public EcomCustProfile(JdbcTemplate template) {
     super(template);

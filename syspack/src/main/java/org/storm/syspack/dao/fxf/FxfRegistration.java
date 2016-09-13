@@ -3,15 +3,15 @@ package org.storm.syspack.dao.fxf;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-@Repository("NATIONAL_ACCOUNTS")
-public class NationalAccounts extends FxfAccountDao {
+@Repository("FXF_REGISTRATION")
+public class FxfRegistration extends FxfUuidDao {
 
-  public NationalAccounts(JdbcTemplate template) {
+  FxfRegistration(JdbcTemplate template) {
     super(template);
   }
 
   @Override
   String query() {
-    return "SELECT * FROM national_accounts WHERE tf_cno IN(:accounts)";
+    return "SELECT * FROM fxf_registration WHERE fcl_uuid_txt IN(:uuids)";
   }
 }

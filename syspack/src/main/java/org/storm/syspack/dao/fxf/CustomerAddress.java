@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("CUSTOMER_ADDRESS")
-public class CustomerAddress extends AbstractFxfAccountParamDao {
+public class CustomerAddress extends FxfAccountDao {
 
   public CustomerAddress(final JdbcTemplate template) {
     super(template);

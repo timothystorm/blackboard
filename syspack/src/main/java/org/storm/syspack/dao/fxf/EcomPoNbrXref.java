@@ -4,13 +4,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("ECOM_PO_NBR_XREF")
-public class EcomPoNbrXref extends AbstractFxfPhoneParamDao {
+public class EcomPoNbrXref extends FxfPhoneDao {
   public EcomPoNbrXref(JdbcTemplate template) {
     super(template);
   }
 
   @Override
   String query() {
-    return "SELECT * FROM ECOM_PO_NBR_XREF WHERE PHONE_NBR IN(:phones)";
+    return "SELECT * FROM ecom_po_nbr_xref WHERE phone_nbr IN(:phones)";
   }
 }

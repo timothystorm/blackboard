@@ -1,34 +1,66 @@
 package org.storm.syspack.dao.fxf;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.storm.syspack.domain.User;
 
+/**
+ * Utilities for working with parameters of {@link FxfDao}
+ */
 public class FxfDaoUtils {
 
-  public static Map<String, List<Double>> singletonPhoneParam(String paramName, Collection<User> users) {
-    return Collections.singletonMap(paramName, uniquePhones(users));
-  }
-  
-  public static Map<String, List<String>> singletonAccountParam(String paramName, Collection<User> users){
-    return Collections.singletonMap(paramName, uniqueAccounts(users));
+  /**
+   * Converts a collection of {@link User}s to a singleton map (one key, many values) with unique account numbers
+   * 
+   * @param key
+   *          - singleton map key
+   * @param users
+   *          - to extract account numbers from
+   * @return singleton map of unique account numbers
+   */
+  public static Map<String, List<String>> singletonAccountParam(String paramName, Collection<User> users) {
+    List<String> accounts = users.stream().flatMap((usr) -> {
+      return usr.getAccounts().stream();
+    }).distinct().collect(Collectors.toList());
+
+    return Collections.singletonMap(paramName, accounts);
   }
 
-  public static List<Double> uniquePhones(Collection<User> users) {
-    Set<Double> phones = new HashSet<>();
-    users.forEach(u -> phones.add(u.getPhone().getNumber()));
-    return new ArrayList<>(phones);
+  /**
+   * Converts a collection of {@link User}s to a singleton map (one key, many values) with unique phone numbers
+   * 
+   * @param key
+   *          - singleton map key
+   * @param users
+   *          - to extract phone numbers from
+   * @return singleton map of unique phone numbers
+   */
+  public static Map<String, List<Double>> singletonPhoneParam(String key, Collection<User> users) {
+    List<Double> phones = users.stream().map(u -> {
+      return u.getPhone().getNumber();
+    }).distinct().collect(Collectors.toList());
+
+    return Collections.singletonMap(key, phones);
   }
 
-  public static List<String> uniqueAccounts(Collection<User> users) {
-    Set<String> accounts = new HashSet<>();
-    users.forEach(u -> accounts.addAll(u.getAccounts()));
-    return new ArrayList<>(accounts);
+  /**
+   * Converts a collection of {@link User}s to a singleton map (one key, many values) with unique uuids
+   * 
+   * @param key
+   *          - singleton map key
+   * @param users
+   *          - to extract uuids from
+   * @return singleton map of unique uuids
+   */
+  public static Map<String, List<String>> singletonUuidParam(String paramName, Collection<User> users) {
+    List<String> uuids = users.stream().map(u -> {
+      return u.getUuid();
+    }).distinct().collect(Collectors.toList());
+
+    return Collections.singletonMap(paramName, uuids);
   }
 }

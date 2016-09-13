@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.storm.syspack.domain.BindPackage;
@@ -32,7 +31,7 @@ public class SysPackApp implements Runnable {
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        System.out.println(String.format("\n%s", StringUtils.center("SysPack", 100, '-')));
+        System.out.println(_fileName);
       }
     });
   }
@@ -63,6 +62,7 @@ public class SysPackApp implements Runnable {
   private final String[]           _packages;
   private final BindPackageService _service;
   private final ApplicationContext _cntx;
+  private static final String      _fileName = "bindpacks.csv";
 
   private SysPackApp(String[] args) {
     // define and parse
@@ -123,7 +123,7 @@ public class SysPackApp implements Runnable {
   public void run() {
     try {
       // execute
-      PrintWriter writer = newPrintWriter(_dir, "bindpacks.csv");
+      PrintWriter writer = newPrintWriter(_dir, _fileName);
       try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
         Arrays.stream(_packages).distinct().forEach((pkg) -> {
           Collection<BindPackage> bindPackages = _service.getPackages(pkg);
@@ -134,7 +134,7 @@ public class SysPackApp implements Runnable {
         });
       }
     } catch (Exception e) {
-      e.printStackTrace(System.err);
+      e.printStackTrace();
     }
   }
 }

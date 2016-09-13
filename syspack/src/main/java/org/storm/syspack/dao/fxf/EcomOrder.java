@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("ECOM_ORDER")
-public class EcomOrder extends AbstractFxfPhoneParamDao {
+public class EcomOrder extends FxfPhoneDao {
 
   public EcomOrder(JdbcTemplate template) {
     super(template);
@@ -12,6 +12,6 @@ public class EcomOrder extends AbstractFxfPhoneParamDao {
 
   @Override
   String query() {
-    return "SELECT * FROM ECOM_ORDER WHERE PHONE_NBR IN(:phones)";
+    return "SELECT * FROM ecom_order WHERE phone_nbr IN(:phones)";
   }
 }

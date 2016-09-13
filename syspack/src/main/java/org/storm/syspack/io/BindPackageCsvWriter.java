@@ -11,7 +11,9 @@ import org.storm.syspack.domain.BindPackage;
 import com.opencsv.CSVWriter;
 
 /**
- * name, table, contoken, lastUsed
+ * Writes {@link BindPackage}s to csv.
+ * 
+ * @see BindPackageCsvReader
  */
 public class BindPackageCsvWriter implements Closeable {
   private final CSVWriter _csv;

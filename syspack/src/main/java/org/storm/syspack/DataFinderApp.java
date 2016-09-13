@@ -134,8 +134,7 @@ public class DataFinderApp implements Runnable {
       });
 
       // iterate tables
-      uniqueTables.stream().forEach(table -> {
-        // uniqueTables.parallelStream().forEach(table -> {
+      uniqueTables.parallelStream().forEach(table -> {
         try {
           // create dao for the FXF table
           FxfDao fxfDao = _fxfDaoFactory.getFxfDao(table);

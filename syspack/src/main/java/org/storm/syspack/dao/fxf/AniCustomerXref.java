@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("ANI_CUSTOMER_XREF")
-public class AniCustomerXref extends AbstractFxfPhoneParamDao {
+public class AniCustomerXref extends FxfPhoneDao {
 
   public AniCustomerXref(JdbcTemplate template) {
     super(template);
