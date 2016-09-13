@@ -15,11 +15,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.storm.syspack.dao.fxf.FxfDaoFactory;
 
 /**
- * Application configuration. The {@link Registry} is used to capture the user's credentials for DataSource setup. So
- * the user's credentials should be populated in the {@link Registry} before this class is loaded.
+ * Application configuration. The {@link Session} is used to capture the user's credentials for DataSource
+ * setup. So
+ * the user's credentials should be populated in the {@link Session} before this class is loaded.
  * 
  * @author Timothy Storm
- * @see Registry
+ * @see Session
  */
 @Configuration
 @PropertySource("classpath:config.properties")
@@ -40,9 +41,10 @@ public class Config {
 
   @Bean
   public DataSource dataSource() {
-    String username = Registry.getUsername();
-    String password = Registry.getPassword();
-    Level level = Registry.getDb2Level();
+    Session session = Session.instance();
+    String username = session.get(Session.USERNAME);
+    String password = session.get(Session.PASSWORD);
+    Level level = session.get(Session.DB2LEVEL);
 
     BasicDataSource ds = new BasicDataSource();
     ds.setDriverClassName(_db2Driver);
@@ -66,9 +68,9 @@ public class Config {
   public JdbcTemplate jdbcTemplate(DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
-  
+
   @Bean
-  public NamedParameterJdbcTemplate namedJdbcTemplate(DataSource dataSource){
+  public NamedParameterJdbcTemplate namedJdbcTemplate(DataSource dataSource) {
     return new NamedParameterJdbcTemplate(dataSource);
   }
 }

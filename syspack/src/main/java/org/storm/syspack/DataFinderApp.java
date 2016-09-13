@@ -24,10 +24,21 @@ import org.storm.syspack.io.BindPackageCsvReader;
 
 import com.opencsv.CSVWriter;
 
+/**
+ * Extracts user's data from the bind package tables
+ * 
+ * @author Timothy Storm
+ */
 public class DataFinderApp implements Runnable {
   private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
 
-  public static void main(String[] args) throws Exception {
+  /**
+   * CLI entry point
+   * 
+   * @param args
+   *          - cli arguments
+   */
+  public static void main(String[] args) {
     new Thread(new DataFinderApp(args), "DataFinder").start();
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -53,12 +64,13 @@ public class DataFinderApp implements Runnable {
     _bindPackFilePath = _cmd.getOptionValue("bindpacks");
     _usernames = _cmd.getArgs();
 
-    // populate registry
-    Registry.setUsername(_cmd.getOptionValue('u'));
-    Registry.setPassword(_cmd.getOptionValue('p'));
+    // populate session
+    Session session = Session.instance();
+    session.put(Session.USERNAME, _cmd.getOptionValue('u'));
+    session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
 
     Level level = Level.toLevel(_cmd.getOptionValue('l'));
-    Registry.setDb2Level(level == null ? Level.L3 : level);
+    session.put(Session.DB2LEVEL, (level == null ? Level.L3 : level));
 
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
@@ -122,8 +134,8 @@ public class DataFinderApp implements Runnable {
       });
 
       // iterate tables
-//      uniqueTables.stream().forEach(table -> {
-      uniqueTables.parallelStream().forEach(table -> {
+      uniqueTables.stream().forEach(table -> {
+        // uniqueTables.parallelStream().forEach(table -> {
         try {
           // create dao for the FXF table
           FxfDao fxfDao = _fxfDaoFactory.getFxfDao(table);
@@ -133,7 +145,7 @@ public class DataFinderApp implements Runnable {
           try (CSVWriter csvWriter = new CSVWriter(writer)) {
             fxfDao.loadTo(users, csvWriter);
           }
-        } catch(NoSuchBeanDefinitionException e){
+        } catch (NoSuchBeanDefinitionException e) {
           System.err.println(e.getMessage());
         } catch (IOException e) {
           e.printStackTrace(System.err);

@@ -21,7 +21,13 @@ import org.storm.syspack.service.BindPackageService;
 public class SysPackApp implements Runnable {
   private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
 
-  public static void main(String[] args) throws Exception {
+  /**
+   * CLI entry point
+   * 
+   * @param args
+   *          - cli arguments
+   */
+  public static void main(String[] args) {
     new Thread(new SysPackApp(args), "SysPack").start();
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -66,12 +72,13 @@ public class SysPackApp implements Runnable {
     _dir = _cmd.getOptionValue('d');
     _packages = _cmd.getArgs();
 
-    // populate registry
-    Registry.setUsername(_cmd.getOptionValue('u'));
-    Registry.setPassword(_cmd.getOptionValue('p'));
-    
+    // populate session
+    Session session = Session.instance();
+    session.put(Session.USERNAME, _cmd.getOptionValue('u'));
+    session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
+
     Level level = Level.toLevel(_cmd.getOptionValue('l'));
-    Registry.setDb2Level(level == null ? Level.L3 : level);
+    session.put(Session.DB2LEVEL, (level == null ? Level.L3 : level));
 
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
