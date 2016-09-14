@@ -3,6 +3,8 @@ package org.storm.syspack.db2;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.storm.syspack.dao.db2.Level;
+import org.storm.syspack.dao.db2.LevelFactory;
 
 public class LevelFatoryTest {
   @Test

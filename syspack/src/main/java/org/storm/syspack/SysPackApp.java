@@ -8,7 +8,7 @@ import java.util.Collection;
 import org.apache.commons.cli.CommandLine;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.storm.syspack.db2.LevelFactory;
+import org.storm.syspack.dao.db2.LevelFactory;
 import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.io.BindPackageCsvWriter;
 import org.storm.syspack.service.BindPackageService;

@@ -1,4 +1,4 @@
-package org.storm.syspack.db2;
+package org.storm.syspack.dao.db2;
 
 import java.io.Serializable;
 
