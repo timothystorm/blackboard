@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.storm.syspack.domain.BindPackage;
 
 import com.opencsv.CSVWriter;
+import com.opencsv.ResultSetHelperService;
 
 /**
  * Writes {@link BindPackage}s to csv.
@@ -17,21 +18,21 @@ import com.opencsv.CSVWriter;
  * @see BindPackageCsvReader
  */
 public class BindPackageCsvWriter implements Closeable {
-  private final CSVWriter     _csv;
-  private final AtomicBoolean _headerWritten = new AtomicBoolean(false);
+  private final CSVWriter      _csv;
+  private final AtomicBoolean  _headerWritten = new AtomicBoolean(false);
+  public static final String[] HEADER         = { "BIND_NAME", "TABLE", "CONTOKEN", "LAST_USED" };
 
   public BindPackageCsvWriter(Writer writer) {
     assert writer != null;
-    _csv = new CSVWriter(writer);
+    _csv = new CSVDB2Writer(writer);
   }
 
   public void write(Collection<BindPackage> bindPackages) {
     if (bindPackages == null || bindPackages.isEmpty()) return;
 
-    // write header
     if (!_headerWritten.get()) {
+      _csv.writeNext(HEADER);
       _headerWritten.set(true);
-      _csv.writeNext(new String[] { "BIND_NAME", "TABLE", "CONTOKEN", "LAST_USED" });
     }
 
     // write rows

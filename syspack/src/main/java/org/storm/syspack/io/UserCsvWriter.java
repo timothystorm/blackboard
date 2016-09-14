@@ -14,7 +14,7 @@ public class UserCsvWriter implements Closeable {
   private final CSVWriter _csv;
 
   public UserCsvWriter(PrintWriter writer) {
-    _csv = new CSVWriter(writer);
+    _csv = new CSVDB2Writer(writer);
   }
 
   public void write(Collection<User> users) {

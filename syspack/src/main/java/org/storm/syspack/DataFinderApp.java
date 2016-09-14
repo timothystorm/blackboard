@@ -21,6 +21,7 @@ import org.storm.syspack.dao.fxf.FxfDaoFactory;
 import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.domain.User;
 import org.storm.syspack.io.BindPackageCsvReader;
+import org.storm.syspack.io.CSVDB2Writer;
 
 import com.opencsv.CSVWriter;
 
@@ -141,7 +142,7 @@ public class DataFinderApp implements Runnable {
 
           // write table data
           FileWriter writer = newFileWriter(_dir, table + ".csv");
-          try (CSVWriter csvWriter = new CSVWriter(writer)) {
+          try (CSVWriter csvWriter = new CSVDB2Writer(writer)) {
             fxfDao.loadTo(users, csvWriter);
           }
         } catch (NoSuchBeanDefinitionException e) {
