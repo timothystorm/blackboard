@@ -3,16 +3,15 @@ package org.storm.syspack;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.storm.syspack.dao.fxf.FxfDaoFactory;
+import org.storm.syspack.db2.Level;
 
 /**
  * Application configuration. The {@link Session} is used to capture the user's credentials for DataSource
@@ -23,7 +22,6 @@ import org.storm.syspack.dao.fxf.FxfDaoFactory;
  * @see Session
  */
 @Configuration
-@PropertySource("classpath:config.properties")
 @ComponentScan(basePackages = "org.storm.syspack")
 public class Config {
   /**
@@ -36,9 +34,6 @@ public class Config {
     return new PropertySourcesPlaceholderConfigurer();
   }
 
-  @Value("${db2.driver}")
-  public String _db2Driver;
-
   @Bean
   public DataSource dataSource() {
     Session session = Session.instance();
@@ -47,13 +42,13 @@ public class Config {
     Level level = session.get(Session.DB2LEVEL);
 
     BasicDataSource ds = new BasicDataSource();
-    ds.setDriverClassName(_db2Driver);
-    ds.setUrl(level.url());
+    ds.setDriverClassName(level.getDriver());
+    ds.setUrl(level.getUrl());
     ds.setUsername(username);
     ds.setPassword(password);
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
-    ds.setConnectionProperties(String.format("currentSchema=%s;", level.schema()));
+    ds.setConnectionProperties(level.getProps());
     return ds;
   }
 

@@ -2,5 +2,4 @@
 /.settings/
 /.classpath
 /.project
-/.idea/
-/syspackage.iml
+/db2.properties

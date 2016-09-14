@@ -8,6 +8,7 @@ import java.util.Collection;
 import org.apache.commons.cli.CommandLine;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.storm.syspack.db2.LevelFactory;
 import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.io.BindPackageCsvWriter;
 import org.storm.syspack.service.BindPackageService;
@@ -76,9 +77,7 @@ public class SysPackApp implements Runnable {
     Session session = Session.instance();
     session.put(Session.USERNAME, _cmd.getOptionValue('u'));
     session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-
-    Level level = Level.toLevel(_cmd.getOptionValue('l'));
-    session.put(Session.DB2LEVEL, (level == null ? Level.L3 : level));
+    session.put(Session.DB2LEVEL, LevelFactory.createSource(_cmd.getOptionValue('l', "3")));
 
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
@@ -96,7 +95,7 @@ public class SysPackApp implements Runnable {
     cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
     cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
     cli.with(cli.opt('d').longOpt("directory").desc("Specify where to place generated csv files").hasArg().build());
-    cli.with(cli.opt('l').longOpt("level").desc("DB2 level to execute queries").hasArg().build());
+    cli.with(cli.opt('l').longOpt("level").desc("DB2 level to search for Bind packages [3]").hasArg().build());
     cli.usageWidth(800);
     return cli;
   }

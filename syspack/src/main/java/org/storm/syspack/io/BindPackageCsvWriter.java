@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.storm.syspack.domain.BindPackage;
 
 import com.opencsv.CSVWriter;
-import com.opencsv.ResultSetHelperService;
 
 /**
  * Writes {@link BindPackage}s to csv.

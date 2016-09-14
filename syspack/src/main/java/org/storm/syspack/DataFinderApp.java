@@ -18,6 +18,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.storm.syspack.dao.UserDao;
 import org.storm.syspack.dao.fxf.FxfDao;
 import org.storm.syspack.dao.fxf.FxfDaoFactory;
+import org.storm.syspack.db2.LevelFactory;
 import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.domain.User;
 import org.storm.syspack.io.BindPackageCsvReader;
@@ -69,10 +70,8 @@ public class DataFinderApp implements Runnable {
     Session session = Session.instance();
     session.put(Session.USERNAME, _cmd.getOptionValue('u'));
     session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-
-    Level level = Level.toLevel(_cmd.getOptionValue('l'));
-    session.put(Session.DB2LEVEL, (level == null ? Level.L3 : level));
-
+    session.put(Session.DB2LEVEL, LevelFactory.createSource(_cmd.getOptionValue('l', "3")));
+    
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
     _userDao = _cntx.getBean(UserDao.class);

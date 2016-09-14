@@ -12,11 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Session {
   // singleton instance
-  private static Session            _instance;
+  private static Session     _instance;
 
-  public static final String        DB2LEVEL = "DB2LEVEL";
-  public static final String        PASSWORD = "PASSWORD";
-  public static final String        USERNAME = "USERNAME";
+  public static final String DB2LEVEL = "DB2LEVEL";
+  public static final String PASSWORD        = "PASSWORD";
+  public static final String USERNAME        = "USERNAME";
 
   public static Session instance() {
     if (_instance == null) {
