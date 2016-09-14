@@ -2,4 +2,4 @@
 /.settings/
 /.classpath
 /.project
-/db2.properties
+**/db2.properties
