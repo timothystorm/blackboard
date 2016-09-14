@@ -48,7 +48,7 @@ public class Config {
     ds.setPassword(password);
     ds.setMinIdle(5);
     ds.setMaxIdle(10);
-    ds.setConnectionProperties(level.getProps());
+    ds.setConnectionProperties(level.getAttributes());
     return ds;
   }
 
