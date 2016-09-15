@@ -10,7 +10,7 @@ public class LevelFactoryTest {
   @Test
   public void test_createSource() throws Exception {
     for (int i = 1; i <= 7; i++) {
-      Level level = LevelFactory.createSource(i);
+      Level level = LevelFactory.createUte(i);
       assertNotNull(level);
       assertNotNull(level.getDriver());
       assertNotNull(level.getUrl());
@@ -21,7 +21,7 @@ public class LevelFactoryTest {
   @Test
   public void test_createTarget() throws Exception {
     for (int i = 1; i <= 7; i++) {
-      Level level = LevelFactory.createTarget(i);
+      Level level = LevelFactory.createEnv(i);
       assertNotNull(level);
       assertNotNull(level.getDriver());
       assertNotNull(level.getUrl());

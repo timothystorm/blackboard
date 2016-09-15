@@ -1,17 +1,19 @@
 package org.storm.syspack;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.storm.syspack.dao.BindPackageDao;
 import org.storm.syspack.dao.db2.LevelFactory;
-import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.io.BindPackageCsvWriter;
-import org.storm.syspack.service.BindPackageService;
 
 /**
  * CLI utility to find tables associated with bind packages
@@ -19,7 +21,11 @@ import org.storm.syspack.service.BindPackageService;
  * @author Timothy Storm
  */
 public class SysPackApp implements Runnable {
-  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
+  private static final Logger log           = LoggerFactory.getLogger(SysPackApp.class);
+
+  private static final String DEFAULT_LEVEL = "3";
+
+  private static final String USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
 
   /**
    * CLI entry point
@@ -60,28 +66,29 @@ public class SysPackApp implements Runnable {
 
   private final CommandLine        _cmd;
   private final String             _dir;
-  private final String[]           _packages;
-  private final BindPackageService _service;
+  private final Collection<String> _packages;
+  private final BindPackageDao     _dao;
   private final ApplicationContext _cntx;
   private static final String      _fileName = "bindpacks.csv";
 
   private SysPackApp(String[] args) {
     // define and parse
-    _cmd = parse(define(), args);
+    _cmd = defineCommand().parse(args);
+    if (_cmd == null) System.exit(-1);
 
     // interrogate
     _dir = _cmd.getOptionValue('d');
-    _packages = _cmd.getArgs();
+    _packages = Arrays.asList(_cmd.getArgs());
 
-    // populate session
+    // create and populate session
     Session session = Session.instance();
     session.put(Session.USERNAME, _cmd.getOptionValue('u'));
     session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-    session.put(Session.DB2LEVEL, LevelFactory.createSource(_cmd.getOptionValue('l', "3")));
+    session.put(Session.DB2LEVEL, LevelFactory.createUte(_cmd.getOptionValue('l', DEFAULT_LEVEL)));
 
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
-    _service = _cntx.getBean(BindPackageService.class);
+    _dao = _cntx.getBean(BindPackageDao.class);
   }
 
   /**
@@ -89,51 +96,28 @@ public class SysPackApp implements Runnable {
    * 
    * @return CliBuilder
    */
-  private CliBuilder define() {
+  private CliBuilder defineCommand() {
     CliBuilder cli = new CliBuilder(USAGE).hasArgs();
-    cli.with(cli.opt('h').longOpt("help").desc("This message").build());
-    cli.with(cli.opt('u').longOpt("username").desc("RACF").required().hasArg().build());
+    cli.with(cli.help('h', "help").build());
+    cli.with(cli.opt('u').longOpt("username").desc("DB2 username").required().hasArg().build());
     cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").required().hasArg().build());
-    cli.with(cli.opt('d').longOpt("directory").desc("Specify where to place generated csv files").hasArg().build());
-    cli.with(cli.opt('l').longOpt("level").desc("DB2 level to search for Bind packages [3]").hasArg().build());
+    cli.with(cli.opt('d').longOpt("directory").desc("Directory to write CSV (stdout by default)").hasArg().build());
+    cli.with(cli.opt('l').longOpt("level").desc("DB2 level [1-7] (" + DEFAULT_LEVEL + " by default)").hasArg().build());
     cli.usageWidth(800);
     return cli;
   }
 
-  /**
-   * Parses the command line options. If the parsing fails or the user select "help" this will show usage and exit
-   * 
-   * @param cli
-   *          - to parse the args with
-   * @param args
-   *          - user args to parse
-   * @return parsed command line
-   */
-  private CommandLine parse(CliBuilder cli, String[] args) {
-    CommandLine cmd = cli.parse(args);
-    if (cmd == null || cmd.hasOption('h')) {
-      cli.usage();
-      System.exit((cmd == null) ? -1 : 0);
-    }
-    return cmd;
-  }
-
   @Override
   public void run() {
-    try {
-      // execute
-      PrintWriter writer = newPrintWriter(_dir, _fileName);
-      try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
-        Arrays.stream(_packages).distinct().forEach((pkg) -> {
-          Collection<BindPackage> bindPackages = _service.getPackages(pkg);
-          csv.write(bindPackages);
+    PrintWriter writer = newPrintWriter(_dir, _fileName);
 
-          // stop if user interrupts
-          if (Thread.currentThread().isInterrupted()) return;
-        });
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+    try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
+      _packages.stream().distinct().sorted().forEach((pkg) -> {
+        csv.write(_dao.find(pkg));
+        if (Thread.currentThread().isInterrupted()) return;
+      });
+    } catch (IOException e) {
+      log.error("Could not open CSV for writing", e);
     }
   }
 }

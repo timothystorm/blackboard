@@ -23,7 +23,7 @@ public class Db2TableLoader extends NamedParameterJdbcDaoSupport {
 
   public void load(String tableName, CSVReader csv) {
     try {
-      NamedParamInsert insert = new NamedParamInsert(getConnection().getMetaData(), tableName);
+      NamedParameterInsert insert = new NamedParameterInsert(getConnection(), tableName);
 
       // read the header row
       Map<Integer, String> indexToNameMap = new HashMap<>();

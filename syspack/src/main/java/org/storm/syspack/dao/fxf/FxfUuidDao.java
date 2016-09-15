@@ -22,14 +22,16 @@ import com.opencsv.CSVWriter;
  * setup a query as the example and provide an IN(:uuids) clause.
  */
 public abstract class FxfUuidDao extends NamedParameterJdbcDaoSupport implements FxfDao {
-  protected Logger _log = LoggerFactory.getLogger(getClass());
-  
-  FxfUuidDao(JdbcTemplate template){
+  protected Logger log = LoggerFactory.getLogger(getClass());
+
+  FxfUuidDao(JdbcTemplate template) {
     setJdbcTemplate(template);
   }
 
   @Override
   public void loadTo(Collection<User> users, CSVWriter csv) {
+    if (log.isDebugEnabled()) log.debug("Loading {}...", getClass());
+
     Map<String, List<String>> param = FxfDaoUtils.singletonUuidParam("uuids", users);
 
     getNamedParameterJdbcTemplate().query(query(), param, new ResultSetExtractor<User>() {
@@ -37,7 +39,7 @@ public abstract class FxfUuidDao extends NamedParameterJdbcDaoSupport implements
         try {
           csv.writeAll(rs, true, true);
         } catch (IOException e) {
-          _log.error("failed to write csv data", e);
+          log.error("loading failed", e);
         }
 
         // the user data was written to the CSV so no need to return

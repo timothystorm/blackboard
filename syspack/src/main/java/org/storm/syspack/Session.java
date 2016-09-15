@@ -15,16 +15,27 @@ public class Session {
   private static Session     _instance;
 
   public static final String DB2LEVEL = "DB2LEVEL";
-  public static final String PASSWORD        = "PASSWORD";
-  public static final String USERNAME        = "USERNAME";
+  public static final String PASSWORD = "PASSWORD";
+  public static final String USERNAME = "USERNAME";
 
-  public static Session instance() {
-    if (_instance == null) {
+  /**
+   * Gets the instance of the {@link Session} or creates one if directed to do so.
+   * 
+   * @param create
+   *          - true to create a new session if necessary; false to return null if there's no current session
+   * @return the Session associated with this request or null if create is false and the request has no valid session
+   */
+  public static Session instance(boolean create) {
+    if (_instance == null && create) {
       synchronized (Session.class) {
         if (_instance == null) _instance = new Session();
       }
     }
     return _instance;
+  }
+
+  public static Session instance() {
+    return instance(true);
   }
 
   private final Map<String, Object> _attributes;

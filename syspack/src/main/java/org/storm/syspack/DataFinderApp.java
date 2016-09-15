@@ -4,14 +4,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -32,7 +35,10 @@ import com.opencsv.CSVWriter;
  * @author Timothy Storm
  */
 public class DataFinderApp implements Runnable {
-  private static final String USAGE = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
+  private static final Logger log = LoggerFactory.getLogger(DataFinderApp.class);
+  
+  private static final String USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
+  private static final String DEFAULT_LEVEL = "3";
 
   /**
    * CLI entry point
@@ -45,17 +51,18 @@ public class DataFinderApp implements Runnable {
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        System.out.println(String.format("\n%s", StringUtils.center("DataFinder", 100, '-')));
+        System.out.println(_processed);
       }
     });
   }
 
-  private final CommandLine        _cmd;
-  private final ApplicationContext _cntx;
-  private final String             _dir, _bindPackFilePath;
-  private final FxfDaoFactory      _fxfDaoFactory;
-  private final UserDao            _userDao;
-  private final String[]           _usernames;
+  private static final List<String> _processed = new ArrayList<>();
+  private final CommandLine         _cmd;
+  private final ApplicationContext  _cntx;
+  private final String              _dir, _bindPackFilePath;
+  private final FxfDaoFactory       _fxfDaoFactory;
+  private final UserDao             _userDao;
+  private final String[]            _usernames;
 
   private DataFinderApp(String[] args) {
     // define and parse
@@ -66,12 +73,12 @@ public class DataFinderApp implements Runnable {
     _bindPackFilePath = _cmd.getOptionValue("bindpacks");
     _usernames = _cmd.getArgs();
 
-    // populate session
+    // create and populate session
     Session session = Session.instance();
     session.put(Session.USERNAME, _cmd.getOptionValue('u'));
     session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-    session.put(Session.DB2LEVEL, LevelFactory.createSource(_cmd.getOptionValue('l', "3")));
-    
+    session.put(Session.DB2LEVEL, LevelFactory.createUte(_cmd.getOptionValue('l', DEFAULT_LEVEL)));
+
     // setup context
     _cntx = new AnnotationConfigApplicationContext(Config.class);
     _userDao = _cntx.getBean(UserDao.class);
@@ -85,12 +92,12 @@ public class DataFinderApp implements Runnable {
    */
   private CliBuilder define() {
     CliBuilder cli = new CliBuilder(USAGE).hasArgs();
-    cli.with(cli.opt('h').longOpt("help").desc("This message").build());
-    cli.with(cli.opt('u').longOpt("username").desc("RACF").hasArg().required().build());
-    cli.with(cli.opt('p').longOpt("password").desc("DB2 Password").hasArg().required().build());
-    cli.with(cli.opt('d').longOpt("directory").desc("Specify where to place generated csv files").hasArg().build());
-    cli.with(cli.opt('l').longOpt("level").desc("DB2 level to execute queries").hasArg().build());
-    cli.with(cli.opt().longOpt("bindpacks").desc("BindPacks file").hasArg().required().build());
+    cli.with(cli.help('h', "help").build());
+    cli.with(cli.opt('u').longOpt("username").desc("DB2 username").hasArg().required().build());
+    cli.with(cli.opt('p').longOpt("password").desc("DB2 password").hasArg().required().build());
+    cli.with(cli.opt('d').longOpt("directory").desc("Directory to write CSVs").hasArg().required().build());
+    cli.with(cli.opt('l').longOpt("level").desc("DB2 level [1-7] (" + DEFAULT_LEVEL + " by default)").hasArg().build());
+    cli.with(cli.opt().longOpt("bindpacks").desc("BindPacks file path").hasArg().required().build());
     cli.usageWidth(800);
     return cli;
   }
@@ -143,15 +150,18 @@ public class DataFinderApp implements Runnable {
           FileWriter writer = newFileWriter(_dir, table + ".csv");
           try (CSVWriter csvWriter = new CSVDB2Writer(writer)) {
             fxfDao.loadTo(users, csvWriter);
+            _processed.add(table);
+
+            if (Thread.currentThread().isInterrupted()) return;
           }
         } catch (NoSuchBeanDefinitionException e) {
-          System.err.println(e.getMessage());
+          log.warn(e.getMessage());
         } catch (IOException e) {
-          e.printStackTrace(System.err);
+          log.error("Failed to write csv data", e);
         }
       });
     } catch (IOException e) {
-      e.printStackTrace(System.err);
+      log.error("Failed to process bind data", e);
     }
   }
 
