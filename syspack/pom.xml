@@ -157,6 +157,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<extraJvmArguments>-Xms256m -Xmx2048m</extraJvmArguments>
 					<programs>
 						<program>
 							<mainClass>org.storm.syspack.SysPackApp</mainClass>
@@ -165,6 +166,10 @@
 						<program>
 							<mainClass>org.storm.syspack.DataFinderApp</mainClass>
 							<id>datafinder</id>
+						</program>
+						<program>
+							<mainClass>org.storm.syspack.DataLoaderApp</mainClass>
+							<id>dataloader</id>
 						</program>
 					</programs>
 				</configuration>

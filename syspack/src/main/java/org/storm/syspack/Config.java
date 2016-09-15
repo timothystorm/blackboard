@@ -46,13 +46,15 @@ public class Config {
 
     // build DataSource
     BasicDataSource ds = new BasicDataSource();
+    ds.setConnectionProperties(level.getAttributes());
     ds.setDriverClassName(level.getDriver());
     ds.setUrl(level.getUrl());
     ds.setUsername(username);
     ds.setPassword(password);
-    ds.setMinIdle(5);
-    ds.setMaxIdle(10);
-    ds.setConnectionProperties(level.getAttributes());
+    ds.setMinIdle(1);
+    ds.setMaxIdle(Runtime.getRuntime().availableProcessors() + 1);
+    ds.setValidationQuery("SELECT COUNT(*) FROM SYSDUMMY1");
+    ds.setValidationQueryTimeout(3);
     return ds;
   }
 

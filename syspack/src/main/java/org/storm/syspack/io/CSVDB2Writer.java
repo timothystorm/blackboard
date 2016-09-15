@@ -45,7 +45,7 @@ public class CSVDB2Writer extends CSVWriter {
   protected void initDb2() {
     ResultSetHelperService resultSetHelper = new ResultSetHelperService();
     resultSetHelper.setDateFormat("yyyy-MM-dd");
-    resultSetHelper.setDateTimeFormat("dd-MMM-yyyy HH:mm:ss.SSS");
+    resultSetHelper.setDateTimeFormat("yyyy-MM-dd HH:mm:ss.SSS");
     setResultService(resultSetHelper);
   }
 }

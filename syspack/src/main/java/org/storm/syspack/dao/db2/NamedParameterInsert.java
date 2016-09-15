@@ -7,9 +7,12 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Creates a full table named parameter insert query.
+ */
 class NamedParameterInsert {
   private final String _query;
-  
+
   NamedParameterInsert(Connection conn, String tableName) throws SQLException {
     this(conn.getMetaData(), tableName);
   }
@@ -44,7 +47,7 @@ class NamedParameterInsert {
     cols.setLength(cols.length() - 2);
     vals.setLength(vals.length() - 2);
 
-    // asseble parts
+    // assemble parts
     query.append("(").append(cols).append(") VALUES(").append(vals).append(")");
     return query.toString();
   }

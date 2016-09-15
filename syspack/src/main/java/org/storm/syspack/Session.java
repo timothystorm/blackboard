@@ -38,7 +38,7 @@ public class Session {
     return instance(true);
   }
 
-  private final Map<String, Object> _attributes;
+  private final transient Map<String, Object> _attributes;
 
   private Session() {
     _attributes = new ConcurrentHashMap<>();

@@ -1,5 +1,7 @@
 package org.storm.syspack;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.cli.CommandLine;
@@ -26,6 +27,7 @@ import org.storm.syspack.domain.User;
 import org.storm.syspack.io.BindPackageCsvReader;
 import org.storm.syspack.io.CSVDB2Writer;
 import org.storm.syspack.utils.FileUtils;
+import org.storm.syspack.utils.TimeUtils;
 
 import com.opencsv.CSVWriter;
 
@@ -35,10 +37,9 @@ import com.opencsv.CSVWriter;
  * @author Timothy Storm
  */
 public class DataFinderApp implements Runnable {
-  private static final Set<String> _processed    = new TreeSet<>();
+  private static final Set<String> _processed    = new ConcurrentSkipListSet<>();
   private static final String      DEFAULT_LEVEL = "3";
   private static final Logger      log           = LoggerFactory.getLogger(DataFinderApp.class);
-
   private static final String      USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
 
   /**
@@ -49,10 +50,12 @@ public class DataFinderApp implements Runnable {
    */
   public static void main(String[] args) {
     new Thread(new DataFinderApp(args), "DataFinder").start();
+    final Long start = System.currentTimeMillis();
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        System.out.println(_processed);
+        System.out.println(
+            format("(%s) %s", TimeUtils.formatMillis(System.currentTimeMillis() - start), _processed));
       }
     });
   }

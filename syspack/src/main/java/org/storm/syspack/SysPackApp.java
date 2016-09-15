@@ -1,10 +1,14 @@
 package org.storm.syspack;
 
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.cli.CommandLine;
 import org.slf4j.Logger;
@@ -15,6 +19,7 @@ import org.storm.syspack.dao.BindPackageDao;
 import org.storm.syspack.dao.db2.LevelFactory;
 import org.storm.syspack.io.BindPackageCsvWriter;
 import org.storm.syspack.utils.FileUtils;
+import org.storm.syspack.utils.TimeUtils;
 
 /**
  * CLI utility to find tables associated with bind packages
@@ -26,8 +31,9 @@ public class SysPackApp implements Runnable {
 
   private static final String DEFAULT_LEVEL = "3";
 
-  private static final String USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERN...)";
+  private static final String USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERNS...)";
 
+  private static final Set<String> _processed = new ConcurrentSkipListSet<>();
   /**
    * CLI entry point
    * 
@@ -36,10 +42,12 @@ public class SysPackApp implements Runnable {
    */
   public static void main(String[] args) {
     new Thread(new SysPackApp(args), "SysPack").start();
+    final Long start = System.currentTimeMillis();
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        System.out.println(_fileName);
+        System.out.println(
+            format("(%s) %s", TimeUtils.formatMillis(System.currentTimeMillis() - start), _processed));
       }
     });
   }
@@ -115,6 +123,8 @@ public class SysPackApp implements Runnable {
     try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
       _packages.stream().distinct().sorted().forEach((pkg) -> {
         csv.write(_dao.find(pkg));
+        _processed.add(pkg);
+        
         if (Thread.currentThread().isInterrupted()) return;
       });
     } catch (IOException e) {
