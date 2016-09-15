@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.apache.commons.cli.CommandLine;
@@ -26,6 +25,7 @@ import org.storm.syspack.domain.BindPackage;
 import org.storm.syspack.domain.User;
 import org.storm.syspack.io.BindPackageCsvReader;
 import org.storm.syspack.io.CSVDB2Writer;
+import org.storm.syspack.utils.FileUtils;
 
 import com.opencsv.CSVWriter;
 
@@ -35,10 +35,11 @@ import com.opencsv.CSVWriter;
  * @author Timothy Storm
  */
 public class DataFinderApp implements Runnable {
-  private static final Logger log = LoggerFactory.getLogger(DataFinderApp.class);
-  
-  private static final String USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
-  private static final String DEFAULT_LEVEL = "3";
+  private static final Set<String> _processed    = new TreeSet<>();
+  private static final String      DEFAULT_LEVEL = "3";
+  private static final Logger      log           = LoggerFactory.getLogger(DataFinderApp.class);
+
+  private static final String      USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> (--bindpacks) <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (USER_NAMES...)";
 
   /**
    * CLI entry point
@@ -56,21 +57,21 @@ public class DataFinderApp implements Runnable {
     });
   }
 
-  private static final List<String> _processed = new ArrayList<>();
-  private final CommandLine         _cmd;
-  private final ApplicationContext  _cntx;
-  private final String              _dir, _bindPackFilePath;
-  private final FxfDaoFactory       _fxfDaoFactory;
-  private final UserDao             _userDao;
-  private final String[]            _usernames;
+  private final CommandLine        _cmd;
+  private final ApplicationContext _cntx;
+  private final String             _dir, _bindPackFilePath;
+  private final FxfDaoFactory      _fxfDaoFactory;
+  private final UserDao            _userDao;
+  private final String[]           _usernames;
 
   private DataFinderApp(String[] args) {
     // define and parse
-    _cmd = parse(define(), args);
+    _cmd = defineCommand().parse(args);
+    if (_cmd == null) System.exit(-1);
 
     // interrogate
-    _dir = _cmd.getOptionValue('d');
-    _bindPackFilePath = _cmd.getOptionValue("bindpacks");
+    _dir = FileUtils.normalize(_cmd.getOptionValue('d'));
+    _bindPackFilePath = FileUtils.normalize(_cmd.getOptionValue("bindpacks"));
     _usernames = _cmd.getArgs();
 
     // create and populate session
@@ -90,7 +91,7 @@ public class DataFinderApp implements Runnable {
    * 
    * @return CliBuilder
    */
-  private CliBuilder define() {
+  private CliBuilder defineCommand() {
     CliBuilder cli = new CliBuilder(USAGE).hasArgs();
     cli.with(cli.help('h', "help").build());
     cli.with(cli.opt('u').longOpt("username").desc("DB2 username").hasArg().required().build());
@@ -102,22 +103,17 @@ public class DataFinderApp implements Runnable {
     return cli;
   }
 
-  /**
-   * Parses the command line options. If the parsing fails or the user select "help" this will show usage and exit
-   * 
-   * @param cli
-   *          - to parse the args with
-   * @param args
-   *          - user args to parse
-   * @return parsed command line
-   */
-  private CommandLine parse(CliBuilder cli, String[] args) {
-    CommandLine cmd = cli.parse(args);
-    if (cmd == null || cmd.hasOption('h')) {
-      cli.usage();
-      System.exit((cmd == null) ? -1 : 0);
+  private FileWriter newFileWriter(String dir, String fileName) {
+    try {
+      // prepare the path/file
+      File file = new File(dir, fileName);
+      if (file.getParentFile() != null) file.getParentFile().mkdirs();
+      file.createNewFile();
+
+      return new FileWriter(file);
+    } catch (IOException ioe) {
+      throw new RuntimeException(ioe);
     }
-    return cmd;
   }
 
   @Override
@@ -162,19 +158,6 @@ public class DataFinderApp implements Runnable {
       });
     } catch (IOException e) {
       log.error("Failed to process bind data", e);
-    }
-  }
-
-  private FileWriter newFileWriter(String dir, String fileName) {
-    try {
-      // prepare the path/file
-      File file = new File(dir, fileName);
-      if (file.getParentFile() != null) file.getParentFile().mkdirs();
-      file.createNewFile();
-
-      return new FileWriter(file);
-    } catch (IOException ioe) {
-      throw new RuntimeException(ioe);
     }
   }
 }

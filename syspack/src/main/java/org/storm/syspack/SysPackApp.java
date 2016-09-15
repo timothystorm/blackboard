@@ -14,6 +14,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.storm.syspack.dao.BindPackageDao;
 import org.storm.syspack.dao.db2.LevelFactory;
 import org.storm.syspack.io.BindPackageCsvWriter;
+import org.storm.syspack.utils.FileUtils;
 
 /**
  * CLI utility to find tables associated with bind packages
@@ -77,7 +78,7 @@ public class SysPackApp implements Runnable {
     if (_cmd == null) System.exit(-1);
 
     // interrogate
-    _dir = _cmd.getOptionValue('d');
+    _dir = FileUtils.normalize(_cmd.getOptionValue('d'));
     _packages = Arrays.asList(_cmd.getArgs());
 
     // create and populate session
