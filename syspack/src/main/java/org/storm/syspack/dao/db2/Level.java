@@ -7,14 +7,65 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+/**
+ * Holds environment level information for connecting to a data source. Use {@link #builder()} to create new instances.
+ * 
+ * @author Timothy Storm
+ */
 public class Level implements Serializable {
-  private static final long serialVersionUID = 5216463314573336183L;
-  private final String      _url, _driver, _attrs;
+  public static class Builder {
+    private StringBuilder _attr = new StringBuilder();
+    private String        _url, _driver;
 
-  Level(String driver, String url, String attrs) {
-    _driver = driver;
-    _url = url;
-    _attrs = attrs;
+    public Builder attribute(String key, String value) {
+      _attr.append(key).append("=").append(value).append(";");
+      return this;
+    }
+
+    public String attributes() {
+      return _attr.toString();
+    }
+
+    public Level build() {
+      return new Level(this);
+    }
+
+    public String driver() {
+      return _driver;
+    }
+
+    public Builder driver(String driver) {
+      _driver = driver;
+      return this;
+    }
+
+    public Builder attribute(String keyValue) {
+      _attr.append(keyValue).append(";");
+      return this;
+    }
+
+    public String url() {
+      return _url;
+    }
+
+    public Builder url(String url) {
+      _url = url;
+      return this;
+    }
+  }
+
+  private static final long serialVersionUID = 5216463314573336183L;
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  private final String _url, _driver, _attrs;
+
+  private Level(Level.Builder builder) {
+    _driver = builder.driver();
+    _url = builder.url();
+    _attrs = builder.attributes();
   }
 
   @Override
@@ -31,12 +82,12 @@ public class Level implements Serializable {
     return equals.isEquals();
   }
 
-  public String getDriver() {
-    return _driver;
-  }
-
   public String getAttributes() {
     return _attrs;
+  }
+
+  public String getDriver() {
+    return _driver;
   }
 
   public String getUrl() {
@@ -57,7 +108,7 @@ public class Level implements Serializable {
     ToStringBuilder str = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
     str.append("driver", getDriver());
     str.append("url", getUrl());
-    str.append("props", getAttributes());
+    str.append("attributes", getAttributes());
     return str.toString();
   }
 }

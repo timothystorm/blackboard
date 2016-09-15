@@ -19,20 +19,22 @@ import com.opencsv.CSVWriter;
  * Base query that fetches records without any user arguments. Implementations need to provide a {@link #query()}.
  */
 public abstract class FxfNoParamDao extends NamedParameterJdbcDaoSupport implements FxfDao {
-  protected Logger _log = LoggerFactory.getLogger(getClass());
-  
+  protected Logger log = LoggerFactory.getLogger(getClass());
+
   protected FxfNoParamDao(JdbcTemplate template) {
     setJdbcTemplate(template);
   }
 
   @Override
   public void loadTo(Collection<User> users, CSVWriter csv) {
+    if (log.isDebugEnabled()) log.debug("Loading {}...", getClass());
+
     getJdbcTemplate().query(query(), new ResultSetExtractor<User>() {
       public User extractData(ResultSet rs) throws SQLException, DataAccessException {
         try {
           csv.writeAll(rs, true, true);
         } catch (IOException e) {
-          _log.error("failed to write csv data", e);
+          log.error("loading failed", e);
         }
 
         // the user data was written to the CSV so no need to return

@@ -22,7 +22,7 @@ import com.opencsv.CSVWriter;
  * setup a query as the example and provide an IN(:accounts) clause.
  */
 public abstract class FxfAccountDao extends NamedParameterJdbcDaoSupport implements FxfDao {
-  protected Logger _log = LoggerFactory.getLogger(getClass());
+  protected Logger log = LoggerFactory.getLogger(getClass());
   
   FxfAccountDao(JdbcTemplate template){
     setJdbcTemplate(template);
@@ -30,6 +30,8 @@ public abstract class FxfAccountDao extends NamedParameterJdbcDaoSupport impleme
 
   @Override
   public void loadTo(Collection<User> users, CSVWriter csv) {
+    if (log.isDebugEnabled()) log.debug("Loading {}...", getClass());
+    
     Map<String, List<String>> param = FxfDaoUtils.singletonAccountParam("accounts", users);
 
     getNamedParameterJdbcTemplate().query(query(), param, new ResultSetExtractor<User>() {
@@ -37,7 +39,7 @@ public abstract class FxfAccountDao extends NamedParameterJdbcDaoSupport impleme
         try {
           csv.writeAll(rs, true, true);
         } catch (IOException e) {
-          _log.error("failed to write csv data", e);
+          log.error("loading failed", e);
         }
 
         // the user data was written to the CSV so no need to return

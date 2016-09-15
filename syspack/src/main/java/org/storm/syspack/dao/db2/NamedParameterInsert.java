@@ -1,15 +1,23 @@
 package org.storm.syspack.dao.db2;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-class NamedParamInsert {
+/**
+ * Creates a full table named parameter insert query.
+ */
+class NamedParameterInsert {
   private final String _query;
 
-  NamedParamInsert(DatabaseMetaData metaData, String tableName) throws SQLException {
+  NamedParameterInsert(Connection conn, String tableName) throws SQLException {
+    this(conn.getMetaData(), tableName);
+  }
+
+  NamedParameterInsert(DatabaseMetaData metaData, String tableName) throws SQLException {
     _query = init(metaData, tableName);
   }
 
@@ -39,7 +47,7 @@ class NamedParamInsert {
     cols.setLength(cols.length() - 2);
     vals.setLength(vals.length() - 2);
 
-    // asseble parts
+    // assemble parts
     query.append("(").append(cols).append(") VALUES(").append(vals).append(")");
     return query.toString();
   }

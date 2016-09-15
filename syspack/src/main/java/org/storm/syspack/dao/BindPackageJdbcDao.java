@@ -9,6 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -17,8 +19,11 @@ import org.storm.syspack.domain.BindPackage;
 
 @Repository
 public class BindPackageJdbcDao extends JdbcDaoSupport implements BindPackageDao {
+  protected Logger log = LoggerFactory.getLogger(getClass());
+  
   private static final String    WILDCARD = "%";
 
+  /** Number of years previous to search for active bind packages */
   private static final Long      YEARS    = 3L;
 
   /** singleton - do not access directory instead use {@link #query()} */
@@ -50,8 +55,8 @@ public class BindPackageJdbcDao extends JdbcDaoSupport implements BindPackageDao
           sql.append("WHERE a.dlocation = ' ' ");
           sql.append("AND a.btype = 'T' ");
           sql.append("AND a.dtype IN(' ', 'N', 'T', 'F') ");
-          sql.append("AND a.dname LIKE(?) "); // 1
-          sql.append("AND b.lastused >= CURRENT_DATE - ? YEAR "); // 2
+          sql.append("AND a.dname LIKE(?) "); // String:1
+          sql.append("AND b.lastused >= CURRENT_DATE - ? YEAR "); // Integer:2
           QUERY = sql.toString();
         }
       }
@@ -62,6 +67,8 @@ public class BindPackageJdbcDao extends JdbcDaoSupport implements BindPackageDao
   @Override
   public Collection<BindPackage> find(final String pattern) {
     assertPackagePattern(pattern);
+    
+    if(log.isDebugEnabled()) log.debug("find '{}'bind package starting...", pattern);
 
     // setup input params
     List<Object> params = new ArrayList<>();
