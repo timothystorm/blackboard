@@ -44,29 +44,28 @@ public class DataLoaderApp implements Runnable {
     });
   }
 
-  private final CommandLine        _cmd;
   private final List<String>       _files;
-  private final ApplicationContext _cntx;
   private final Db2TableLoader     _dao;
   private static final Set<String> _processed = new ConcurrentSkipListSet<>();
 
+  @SuppressWarnings("resource")
   private DataLoaderApp(String[] args) {
     // define and parse
-    _cmd = defineCommand().parse(args);
-    if (_cmd == null) System.exit(-1);
+    CommandLine cmd = defineCommand().parse(args);
+    if (cmd == null) System.exit(-1);
 
     // interrogate
-    _files = Arrays.asList(_cmd.getArgs());
+    _files = Arrays.asList(cmd.getArgs());
 
     // create and populate session
     Session session = Session.instance();
-    session.put(Session.USERNAME, _cmd.getOptionValue('u'));
-    session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-    session.put(Session.DB2LEVEL, LevelFactory.createEnv(_cmd.getOptionValue('l')));
+    session.put(Session.USERNAME, cmd.getOptionValue('u'));
+    session.put(Session.PASSWORD, cmd.getOptionValue('p'));
+    session.put(Session.DB2LEVEL, LevelFactory.createEnv(cmd.getOptionValue('l')));
 
     // setup context
-    _cntx = new AnnotationConfigApplicationContext(Config.class);
-    _dao = _cntx.getBean(Db2TableLoader.class);
+    ApplicationContext cntx = new AnnotationConfigApplicationContext(Config.class);
+    _dao = cntx.getBean(Db2TableLoader.class);
   }
 
   /**

@@ -60,33 +60,32 @@ public class DataFinderApp implements Runnable {
     });
   }
 
-  private final CommandLine        _cmd;
-  private final ApplicationContext _cntx;
   private final String             _dir, _bindPackFilePath;
   private final FxfDaoFactory      _fxfDaoFactory;
   private final UserDao            _userDao;
   private final String[]           _usernames;
 
+  @SuppressWarnings("resource")
   private DataFinderApp(String[] args) {
     // define and parse
-    _cmd = defineCommand().parse(args);
-    if (_cmd == null) System.exit(-1);
+    CommandLine cmd = defineCommand().parse(args);
+    if (cmd == null) System.exit(-1);
 
     // interrogate
-    _dir = FileUtils.normalize(_cmd.getOptionValue('d'));
-    _bindPackFilePath = FileUtils.normalize(_cmd.getOptionValue("bindpacks"));
-    _usernames = _cmd.getArgs();
+    _dir = FileUtils.normalize(cmd.getOptionValue('d'));
+    _bindPackFilePath = FileUtils.normalize(cmd.getOptionValue("bindpacks"));
+    _usernames = cmd.getArgs();
 
     // create and populate session
     Session session = Session.instance();
-    session.put(Session.USERNAME, _cmd.getOptionValue('u'));
-    session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-    session.put(Session.DB2LEVEL, LevelFactory.createUte(_cmd.getOptionValue('l', DEFAULT_LEVEL)));
+    session.put(Session.USERNAME, cmd.getOptionValue('u'));
+    session.put(Session.PASSWORD, cmd.getOptionValue('p'));
+    session.put(Session.DB2LEVEL, LevelFactory.createUte(cmd.getOptionValue('l', DEFAULT_LEVEL)));
 
     // setup context
-    _cntx = new AnnotationConfigApplicationContext(Config.class);
-    _userDao = _cntx.getBean(UserDao.class);
-    _fxfDaoFactory = _cntx.getBean(FxfDaoFactory.class);
+    ApplicationContext cntx = new AnnotationConfigApplicationContext(Config.class);
+    _userDao = cntx.getBean(UserDao.class);
+    _fxfDaoFactory = cntx.getBean(FxfDaoFactory.class);
   }
 
   /**

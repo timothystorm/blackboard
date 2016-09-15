@@ -27,13 +27,14 @@ import org.storm.syspack.utils.TimeUtils;
  * @author Timothy Storm
  */
 public class SysPackApp implements Runnable {
-  private static final Logger log           = LoggerFactory.getLogger(SysPackApp.class);
+  private static final Logger      log           = LoggerFactory.getLogger(SysPackApp.class);
 
-  private static final String DEFAULT_LEVEL = "3";
+  private static final String      DEFAULT_LEVEL = "3";
 
-  private static final String USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERNS...)";
+  private static final String      USAGE         = "(-u|--username) <arg> (-p|--password) password <arg> [-l|--level] <[1-7]> [-d|--directory] <arg> [-h|--help] (PACKAGE_PATTERNS...)";
 
-  private static final Set<String> _processed = new ConcurrentSkipListSet<>();
+  private static final Set<String> _processed    = new ConcurrentSkipListSet<>();
+
   /**
    * CLI entry point
    * 
@@ -46,8 +47,7 @@ public class SysPackApp implements Runnable {
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        System.out.println(
-            format("(%s) %s", TimeUtils.formatMillis(System.currentTimeMillis() - start), _processed));
+        System.out.println(format("(%s) %s", TimeUtils.formatMillis(System.currentTimeMillis() - start), _processed));
       }
     });
   }
@@ -73,31 +73,30 @@ public class SysPackApp implements Runnable {
     }
   }
 
-  private final CommandLine        _cmd;
   private final String             _dir;
   private final Collection<String> _packages;
   private final BindPackageDao     _dao;
-  private final ApplicationContext _cntx;
   private static final String      _fileName = "bindpacks.csv";
 
+  @SuppressWarnings("resource")
   private SysPackApp(String[] args) {
     // define and parse
-    _cmd = defineCommand().parse(args);
-    if (_cmd == null) System.exit(-1);
+    CommandLine cmd = defineCommand().parse(args);
+    if (cmd == null) System.exit(-1);
 
     // interrogate
-    _dir = FileUtils.normalize(_cmd.getOptionValue('d'));
-    _packages = Arrays.asList(_cmd.getArgs());
+    _dir = FileUtils.normalize(cmd.getOptionValue('d'));
+    _packages = Arrays.asList(cmd.getArgs());
 
     // create and populate session
     Session session = Session.instance();
-    session.put(Session.USERNAME, _cmd.getOptionValue('u'));
-    session.put(Session.PASSWORD, _cmd.getOptionValue('p'));
-    session.put(Session.DB2LEVEL, LevelFactory.createUte(_cmd.getOptionValue('l', DEFAULT_LEVEL)));
+    session.put(Session.USERNAME, cmd.getOptionValue('u'));
+    session.put(Session.PASSWORD, cmd.getOptionValue('p'));
+    session.put(Session.DB2LEVEL, LevelFactory.createUte(cmd.getOptionValue('l', DEFAULT_LEVEL)));
 
     // setup context
-    _cntx = new AnnotationConfigApplicationContext(Config.class);
-    _dao = _cntx.getBean(BindPackageDao.class);
+    ApplicationContext cntx = new AnnotationConfigApplicationContext(Config.class);
+    _dao = cntx.getBean(BindPackageDao.class);
   }
 
   /**
@@ -124,7 +123,7 @@ public class SysPackApp implements Runnable {
       _packages.stream().distinct().sorted().forEach((pkg) -> {
         csv.write(_dao.find(pkg));
         _processed.add(pkg);
-        
+
         if (Thread.currentThread().isInterrupted()) return;
       });
     } catch (IOException e) {
