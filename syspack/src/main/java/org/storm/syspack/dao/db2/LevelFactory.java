@@ -2,12 +2,13 @@ package org.storm.syspack.dao.db2;
 
 import static java.lang.String.format;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.WeakHashMap;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 /**
  * Creates {@link Level}s based on local configurations.
@@ -77,7 +78,7 @@ public class LevelFactory {
   }
 
   /**
-   * Load the DB2 properties from ~/.fxf/db2.properties
+   * Load the DB2 properties from classpath:/db2.properties
    * 
    * @return loaded properties
    */
@@ -87,8 +88,8 @@ public class LevelFactory {
         if (DB2_PROPS == null) {
           try {
             Properties props = new Properties();
-            File dbprops = new File(System.getProperty("user.home"), ".fxf/db2.properties");
-            props.load(new FileInputStream(dbprops));
+            Resource db2Resource = new ClassPathResource("db2.properties");
+            props.load(db2Resource.getInputStream());
             DB2_PROPS = props;
           } catch (IOException e) {
             throw new RuntimeException("Failed to load DB2 properties", e);
