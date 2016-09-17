@@ -160,8 +160,8 @@
 					<extraJvmArguments>-Xms256m -Xmx2048m</extraJvmArguments>
 					<programs>
 						<program>
-							<mainClass>org.storm.syspack.SysPackApp</mainClass>
-							<id>syspack</id>
+							<mainClass>org.storm.syspack.GeneratorApp</mainClass>
+							<id>generate</id>
 						</program>
 						<program>
 							<mainClass>org.storm.syspack.ExtractApp</mainClass>
