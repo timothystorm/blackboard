@@ -115,7 +115,7 @@ public class GeneratorApp implements Runnable {
 
     try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
       _packages.stream().distinct().sorted().forEach((pkg) -> {
-        _progress.post("[Processing %s]", pkg);
+        _progress.post("[Generating %s]", pkg);
         csv.write(_dao.find(pkg));
       });
     } catch (IOException e) {
