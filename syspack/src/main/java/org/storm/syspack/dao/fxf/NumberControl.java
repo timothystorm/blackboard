@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("NUMBER_CONTROL")
-public class NumberControl extends FxfNoParamDao {
+public class NumberControl extends AbstractFxfDao {
 
   public NumberControl(JdbcTemplate template) {
     super(template);

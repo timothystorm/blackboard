@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("WWW_SESSION_ARG")
-public class WwwSessionArg extends FxfNoParamDao {
+public class WwwSessionArg extends AbstractFxfDao {
 
   public WwwSessionArg(JdbcTemplate template) {
     super(template);

@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.storm.syspack.dao.FxfDao;
+import org.storm.syspack.dao.FxfDaoFactory;
 import org.storm.syspack.dao.db2.Level;
-import org.storm.syspack.dao.fxf.FxfDao;
-import org.storm.syspack.dao.fxf.FxfDaoFactory;
 
 /**
  * Application configuration. The {@link Session} is used to capture the user's credentials for DataSource

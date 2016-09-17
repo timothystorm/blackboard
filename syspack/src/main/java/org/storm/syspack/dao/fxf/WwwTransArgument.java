@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("WWW_TRANS_ARGUMENT")
-public class WwwTransArgument extends FxfNoParamDao {
+public class WwwTransArgument extends AbstractFxfDao {
 
   public WwwTransArgument(JdbcTemplate template) {
     super(template);

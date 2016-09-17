@@ -15,7 +15,6 @@ public class AbolHeader extends FxfAccountDao {
     StringBuilder query = new StringBuilder();
     query.append("SELECT * FROM abol_header ");
     query.append("WHERE af_customer_number IN(:accounts) ");
-    query.append("AND abol_date >= CURRENT_DATE - 3 YEAR ");
-    return query.toString();
+    return query.append("AND abol_date >= CURRENT_DATE - 3 YEAR ").toString();
   }
 }

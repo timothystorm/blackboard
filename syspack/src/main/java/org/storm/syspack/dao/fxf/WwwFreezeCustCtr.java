@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("WWW_FREEZE_CUSTCTR")
-public class WwwFreezeCustCtr extends FxfNoParamDao {
+public class WwwFreezeCustCtr extends AbstractFxfDao {
 
   public WwwFreezeCustCtr(JdbcTemplate template) {
     super(template);
@@ -13,8 +13,8 @@ public class WwwFreezeCustCtr extends FxfNoParamDao {
   @Override
   String query() {
     StringBuilder query = new StringBuilder();
-    query.append("SELECT * FROM WWW_FREEZE_CUSTCTR ");
-    query.append("WHERE EFFECTIVE_DATE >= CURRENT_DATE - 3 YEARS");
+    query.append("SELECT * FROM www_freeze_custctr ");
+    query.append("WHERE effective_date >= CURRENT_DATE - 3 YEARS");
     return query.toString();
   }
 }

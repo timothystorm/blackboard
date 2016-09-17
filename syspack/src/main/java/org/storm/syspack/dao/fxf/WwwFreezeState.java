@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository("WWW_FREEZE_STATE")
-public class WwwFreezeState extends FxfNoParamDao {
+public class WwwFreezeState extends AbstractFxfDao {
 
   public WwwFreezeState(JdbcTemplate template) {
     super(template);
@@ -13,8 +13,8 @@ public class WwwFreezeState extends FxfNoParamDao {
   @Override
   String query() {
     StringBuilder query = new StringBuilder();
-    query.append("SELECT * FROM WWW_FREEZE_STATE ");
-    query.append("WHERE EFFECTIVE_DATE >= CURRENT_DATE - 3 YEARS");
+    query.append("SELECT * FROM www_freeze_state ");
+    query.append("WHERE effective_date >= CURRENT_DATE - 3 YEARS");
     return query.toString();
   }
 }

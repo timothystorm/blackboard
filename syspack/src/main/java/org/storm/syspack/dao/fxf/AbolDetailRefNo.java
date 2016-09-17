@@ -17,7 +17,6 @@ public class AbolDetailRefNo extends FxfAccountDao {
     query.append("JOIN abol_header h ");
     query.append("ON d.fk_abol_headeradva = h.advance_pickup_no ");
     query.append("WHERE h.abol_date >= CURRENT_DATE - 3 YEAR ");
-    query.append("AND h.af_customer_number IN(:accounts)");
-    return query.toString();
+    return query.append("AND h.af_customer_number IN(:accounts)").toString();
   }
 }
