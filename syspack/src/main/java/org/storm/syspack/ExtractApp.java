@@ -145,11 +145,11 @@ public class ExtractApp implements Runnable {
           // write table data
           FileWriter writer = newFileWriter(_dir, table + ".csv");
           try (CSVWriter csvWriter = new CSVDB2Writer(writer)) {
-            _progress.postln("[Extracting " + table + "]");
+            _progress.post("[Extracting " + table + "]");
             fxfDao.load(users, csvWriter);
           }
         } catch (NoSuchBeanDefinitionException e) {
-          _progress.postln("[No Extractor defined for " + table + "]");
+          _progress.post("[No Extractor defined for " + table + "]");
         } catch (IOException e) {
           log.error("Failed to write csv data", e);
         }
