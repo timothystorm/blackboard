@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.storm.abseil.Abseil.State;
-import org.storm.abseil.runnable.RunnableDelay;
+import org.storm.abseil.runnable.DelayRunnable;
 
 /**
  * Tests the shutdown of Abseils after a predetermined timeout period, using different Abseil instances. This test is to
@@ -33,7 +33,7 @@ public class AbseilTimeoutTest extends AbseilTest {
   @Test
   public void timeout() throws Exception {
     // run tasks in the abseil that never end
-    _abseil.process(() -> new RunnableDelay(Integer.MAX_VALUE, TimeUnit.SECONDS));
+    _abseil.process(() -> new DelayRunnable(() -> {}, Integer.MAX_VALUE, TimeUnit.SECONDS));
 
     // let the absail cycle up
     Thread.sleep(500);

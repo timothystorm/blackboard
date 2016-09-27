@@ -7,7 +7,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import org.storm.abseil.runnable.RunnableMonitor;
+import org.storm.abseil.runnable.MonitorRunnable;
 
 /**
  * <p>
@@ -58,6 +58,7 @@ public class Abseil {
     private void init() {
       if (getState().is(State.INIT)) {
         transitionTo(State.STARTING);
+        _monitor.before();
         transitionTo(State.RUNNING);
       }
     }
@@ -73,7 +74,7 @@ public class Abseil {
       try {
         Runnable task = null;
         while (getState().is(State.RUNNING) && (task = _tasks.get()) != null) {
-          _executor.execute(new RunnableMonitor(task, _monitor));
+          _executor.execute(new MonitorRunnable(task, _monitor));
         }
       } finally {
         shutdown();
@@ -106,8 +107,8 @@ public class Abseil {
           return false;
         } finally {
           transitionTo(State.SHUTDOWN);
+          _monitor.after();
           _future.onComplete(_monitor);
-
           kill();
         }
       }

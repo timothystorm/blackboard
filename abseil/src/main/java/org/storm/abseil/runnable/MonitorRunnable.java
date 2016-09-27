@@ -7,10 +7,10 @@ import org.storm.abseil.Monitor;
  * 
  * @author Timothy Storm
  */
-public class RunnableMonitor extends RunnableDecorator {
+public class MonitorRunnable extends DecoratedRunnable {
   private final Monitor _monitor;
 
-  public RunnableMonitor(Runnable runnable, Monitor monitor) {
+  public MonitorRunnable(Runnable runnable, Monitor monitor) {
     super(runnable);
     _monitor = monitor;
   }

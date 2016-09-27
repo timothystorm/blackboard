@@ -34,19 +34,24 @@ public class Monitor implements Serializable {
   /** failed task count */
   private final Queue<Throwable>         _fails           = new ConcurrentLinkedQueue<>();
 
+  private Long                           _runtime;
+
+  /** starting time of monitor **/
+  private final AtomicLong               _start           = new AtomicLong();
+
   /** successfully completed tasks */
   private final AtomicLong               _success         = new AtomicLong();
 
   /** total monitored tasks */
   private final AtomicLong               _total           = new AtomicLong();
 
-  public void stop() {
-    final long total = _total.get();
-    final long runtime = System.currentTimeMillis() - _startAt.get();
+  public Monitor after() {
+    _runtime = System.currentTimeMillis() - _start.get();
+    return this;
+  }
 
-    _aggregate.addAndGet(runtime);
-    _active.decrementAndGet();
-    _average.updateAndGet((avg) -> (avg * (total - 1) + runtime) / total);
+  public void before() {
+    _start.set(System.currentTimeMillis());
   }
 
   @Override
@@ -107,6 +112,10 @@ public class Monitor implements Serializable {
     return Collections.unmodifiableCollection(_fails);
   }
 
+  public Long getRuntime() {
+    return _runtime;
+  }
+
   public Long getSuccess() {
     return _success.get();
   }
@@ -132,6 +141,15 @@ public class Monitor implements Serializable {
     _active.incrementAndGet();
   }
 
+  public void stop() {
+    final long total = _total.get();
+    final long runtime = System.currentTimeMillis() - _startAt.get();
+
+    _aggregate.addAndGet(runtime);
+    _active.decrementAndGet();
+    _average.updateAndGet((avg) -> (avg * (total - 1) + runtime) / total);
+  }
+
   public void success() {
     _success.incrementAndGet();
   }
@@ -143,7 +161,8 @@ public class Monitor implements Serializable {
     str.append("success=").append(getSuccess()).append(", ");
     str.append("fail=").append(getFail()).append(", ");
     str.append("average=").append(TimeUtils.formatMillis(getAverage())).append(", ");
-    str.append("aggregate=").append(TimeUtils.formatMillis(getAggregate()));
+    str.append("aggregate=").append(TimeUtils.formatMillis(getAggregate())).append(", ");
+    str.append("runtime=").append(TimeUtils.formatMillis(getRuntime()));
     return str.append("]").toString();
   }
 }

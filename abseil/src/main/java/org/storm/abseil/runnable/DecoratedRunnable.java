@@ -1,9 +1,9 @@
 package org.storm.abseil.runnable;
 
-public abstract class RunnableDecorator implements Runnable {
+public abstract class DecoratedRunnable implements Runnable {
   private final Runnable _runnable;
 
-  protected RunnableDecorator(Runnable runnable) {
+  protected DecoratedRunnable(Runnable runnable) {
     _runnable = runnable;
   }
 
