@@ -7,24 +7,19 @@ import org.storm.abseil.Monitor;
  * 
  * @author Timothy Storm
  */
-public class RunnableMonitor implements Runnable {
-  private final Monitor  _monitor;
-  private final Runnable _runnable;
+public class RunnableMonitor extends RunnableDecorator {
+  private final Monitor _monitor;
 
   public RunnableMonitor(Runnable runnable, Monitor monitor) {
+    super(runnable);
     _monitor = monitor;
-    _runnable = runnable;
-  }
-
-  protected Runnable decorated() {
-    return _runnable;
   }
 
   @Override
   public void run() {
     try {
       _monitor.start();
-      decorated().run();
+      runDecorated();
       _monitor.success();
     } catch (Throwable error) {
       _monitor.fail(error);

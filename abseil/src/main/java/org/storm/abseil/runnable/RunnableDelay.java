@@ -7,8 +7,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author Timothy Storm
  */
-public class RunnableDelay implements Runnable {
-  private final Runnable _runnable;
+public class RunnableDelay extends RunnableDecorator {
   private final Long     _delayMillis;
 
   public RunnableDelay(long delay, TimeUnit unit) {
@@ -16,19 +15,15 @@ public class RunnableDelay implements Runnable {
   }
 
   public RunnableDelay(Runnable runnable, long delay, TimeUnit unit) {
-    _runnable = runnable;
+    super(runnable);
     _delayMillis = unit.toMillis(delay);
-  }
-
-  protected Runnable decorated() {
-    return _runnable;
   }
 
   @Override
   public void run() {
     try {
       Thread.sleep(_delayMillis);
-      decorated().run();
+      runDecorated();
     } catch (InterruptedException ignore) {}
   }
 }
