@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.storm.abseil.Abseil.State;
-import org.storm.abseil.runnable.DelayRunnable;
+import org.storm.abseil.runnable.RunnableDelay;
 
 @RunWith(Parameterized.class)
 public class AbseilFinishTest extends AbseilTest {
@@ -32,13 +32,13 @@ public class AbseilFinishTest extends AbseilTest {
 
     // run tasks in the abseil that end after a fixed number of tasks have been run
     _abseil.process(() -> {
-      if (count.decrementAndGet() > 0) return new DelayRunnable(1, TimeUnit.SECONDS);
+      if (count.decrementAndGet() > 0) return new RunnableDelay(1, TimeUnit.SECONDS);
       return null;
     });
-    
+
     // give the abseil a moment to cycle up
     Thread.sleep(500);
 
-    assertState(_abseil, State.SHUTDOWN, 3, TimeUnit.SECONDS);
+    assertState(_abseil, State.SHUTDOWN);
   }
 }

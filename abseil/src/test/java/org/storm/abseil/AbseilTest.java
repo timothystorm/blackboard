@@ -11,7 +11,7 @@ import org.storm.abseil.Abseil.State;
  */
 abstract class AbseilTest {
   /**
-   * asserts an absail's expected state, failing if a 3 second timeout is reached but the state was never reached.
+   * asserts an absail's expected state, failing if Abseil.MAX_TERMINATE_WAIT + 1 is reached but the state was never reached.
    * 
    * @param abseil
    *          - to check state of
@@ -19,7 +19,7 @@ abstract class AbseilTest {
    *          the final state expected
    */
   void assertState(Abseil abseil, State expectedState) throws InterruptedException {
-    assertState(abseil, expectedState, 3, TimeUnit.SECONDS);
+    assertState(abseil, expectedState, (Abseil.MAX_TERMINATE_WAIT + 1), TimeUnit.SECONDS);
   }
 
   /**
