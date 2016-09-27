@@ -3,11 +3,19 @@ package org.storm.abseil.utils;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Thread sleep utilities that don't throw {@link InterruptedException}
+ * 
+ * @author Timothy Storm
+ */
 public class Sleep {
   /**
    * Safely sleeps a fixed amount of time
-   * @param time to wait
-   * @param unit of time 
+   * 
+   * @param time
+   *          to wait
+   * @param unit
+   *          of time
    * @return if fixed sleep completed (true) or was interrupted (false)
    */
   public static boolean fixed(long time, TimeUnit unit) {
@@ -21,9 +29,13 @@ public class Sleep {
 
   /**
    * Safely sleeps a random amount of time within the bounds of time
-   * @param min - time to sleep inclusive
-   * @param max - time to sleep exclusive
-   * @param unit - of time
+   * 
+   * @param min
+   *          - time to sleep inclusive
+   * @param max
+   *          - time to sleep exclusive
+   * @param unit
+   *          - of time
    * @return if fixed sleep completed (true) or was interrupted (false)
    */
   public static boolean random(long min, long max, TimeUnit unit) {
@@ -38,8 +50,11 @@ public class Sleep {
 
   /**
    * Safely sleeps a random amount of time between 0 and max time
-   * @param max - time to sleep
-   * @param unit - of time
+   * 
+   * @param max
+   *          - time to sleep
+   * @param unit
+   *          - of time
    * @return if fixed sleep completed (true) or was interrupted (false)
    */
   public static boolean random(long max, TimeUnit unit) {

@@ -8,7 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.storm.abseil.utils.TimeUtils;
+import org.storm.abseil.utils.Time;
 
 /**
  * Monitors the execution of an Abseil. Each task {@link #start()} is recorded in thread local but all other values are
@@ -161,9 +161,9 @@ public class Monitor implements Serializable {
     str.append("total=").append(getTotal()).append(", ");
     str.append("success=").append(getSuccess()).append(", ");
     str.append("fail=").append(getFail()).append(", ");
-    str.append("average=").append(TimeUtils.formatMillis(getAverage())).append(", ");
-    str.append("aggregate=").append(TimeUtils.formatMillis(getAggregate())).append(", ");
-    str.append("duration=").append(TimeUtils.formatMillis(getDuration()));
+    str.append("average=").append(Time.formatMillis(getAverage())).append(", ");
+    str.append("aggregate=").append(Time.formatMillis(getAggregate())).append(", ");
+    str.append("duration=").append(Time.formatMillis(getDuration()));
     return str.append("]").toString();
   }
 }

@@ -2,9 +2,17 @@ package org.storm.abseil.utils;
 
 import java.util.concurrent.TimeUnit;
 
-public class TimeUtils {
+/**
+ * Time utilities
+ * 
+ * @author Timothy Storm
+ */
+public class Time {
   public static String formatMillis(Long millis) {
     long ms = millis;
+
+    long days = TimeUnit.MILLISECONDS.toDays(ms);
+    ms -= TimeUnit.DAYS.toMillis(days);
 
     long hours = TimeUnit.MILLISECONDS.toHours(ms);
     ms -= TimeUnit.HOURS.toMillis(hours);
@@ -15,6 +23,7 @@ public class TimeUtils {
     long secs = TimeUnit.MILLISECONDS.toSeconds(ms);
     ms -= TimeUnit.SECONDS.toMillis(secs);
 
-    return String.format("%02d:%02d:%02d:%03d", hours, mins, secs, ms);
+    // ISO8601 - PnDTnHnMnS
+    return String.format("P%dDT%dH%dM%dS%d", days, hours, mins, secs, ms);
   }
 }
