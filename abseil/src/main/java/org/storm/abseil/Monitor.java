@@ -34,7 +34,8 @@ public class Monitor implements Serializable {
   /** failed task count */
   private final Queue<Throwable>         _fails           = new ConcurrentLinkedQueue<>();
 
-  private Long                           _runtime;
+  /** monitor duration */
+  private Long                           _duration;
 
   /** starting time of monitor **/
   private final AtomicLong               _start           = new AtomicLong();
@@ -46,7 +47,7 @@ public class Monitor implements Serializable {
   private final AtomicLong               _total           = new AtomicLong();
 
   public Monitor after() {
-    _runtime = System.currentTimeMillis() - _start.get();
+    _duration = System.currentTimeMillis() - _start.get();
     return this;
   }
 
@@ -112,8 +113,8 @@ public class Monitor implements Serializable {
     return Collections.unmodifiableCollection(_fails);
   }
 
-  public Long getRuntime() {
-    return _runtime;
+  public Long getDuration() {
+    return _duration;
   }
 
   public Long getSuccess() {
@@ -162,7 +163,7 @@ public class Monitor implements Serializable {
     str.append("fail=").append(getFail()).append(", ");
     str.append("average=").append(TimeUtils.formatMillis(getAverage())).append(", ");
     str.append("aggregate=").append(TimeUtils.formatMillis(getAggregate())).append(", ");
-    str.append("runtime=").append(TimeUtils.formatMillis(getRuntime()));
+    str.append("duration=").append(TimeUtils.formatMillis(getDuration()));
     return str.append("]").toString();
   }
 }
