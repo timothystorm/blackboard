@@ -1,8 +1,5 @@
 package org.storm.abseil;
 
-import static org.storm.abseil.AbseilBuilder.newPooledTaskAbseilBuilder;
-import static org.storm.abseil.AbseilBuilder.newSingleTaskAbseilBuilder;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +25,9 @@ public class AbseilTimeoutTest extends AbseilTest {
   @Parameterized.Parameters
   public static Collection<Abseil> abseils() {
     // setup abseils that timeout after 1 second
-    return Arrays.asList(new Abseil[] { AbseilBuilder.newFixedTaskAbseilBuilder(1, TimeUnit.SECONDS).build(),
-        newPooledTaskAbseilBuilder(1, TimeUnit.SECONDS).build(),
-        newSingleTaskAbseilBuilder(1, TimeUnit.SECONDS).build() });
+
+    return Arrays.asList(
+        new Abseil[] { Abseil.fixedTaskAbseil(3, 1, TimeUnit.SECONDS), Abseil.singleTaskAbseil(1, TimeUnit.SECONDS) });
   }
 
   @Test(timeout = 5000)

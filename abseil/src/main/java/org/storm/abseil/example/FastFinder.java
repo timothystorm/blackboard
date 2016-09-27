@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import org.storm.abseil.Abseil;
-import org.storm.abseil.AbseilBuilder;
 import org.storm.abseil.runnable.RunnableSupplier;
 import org.storm.abseil.utils.TimeUtils;
 
@@ -36,7 +35,7 @@ public class FastFinder {
               if (p == null) return;
 
               if (isNavigable(p)) {
-                for(File f : p.toFile().listFiles()){
+                for (File f : p.toFile().listFiles()) {
                   if (f.isDirectory()) _dirs.offer(f.toPath());
                   if (f.isFile()) _files.offer(f.toPath());
                 }
@@ -131,8 +130,8 @@ public class FastFinder {
   private final Abseil _producer, _consumer;
 
   public FastFinder() {
-    _producer = AbseilBuilder.newPooledTaskAbseilBuilder().maxTasks(POOL_SIZE).build();
-    _consumer = AbseilBuilder.newPooledTaskAbseilBuilder().maxTasks(POOL_SIZE).build();
+    _producer = Abseil.fixedTaskAbseil(POOL_SIZE);
+    _consumer = Abseil.fixedTaskAbseil(POOL_SIZE);
   }
 
   public void find(final Path p, final String pattern) throws InterruptedException {

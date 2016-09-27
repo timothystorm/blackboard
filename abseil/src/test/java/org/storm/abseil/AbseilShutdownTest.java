@@ -1,9 +1,5 @@
 package org.storm.abseil;
 
-import static org.storm.abseil.AbseilBuilder.newFixedTaskAbseilBuilder;
-import static org.storm.abseil.AbseilBuilder.newPooledTaskAbseilBuilder;
-import static org.storm.abseil.AbseilBuilder.newSingleTaskAbseilBuilder;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +26,8 @@ public class AbseilShutdownTest extends AbseilTest {
   @Parameterized.Parameters
   public static Collection<Abseil> abseils() {
     // setup abseils that run "forever"
-    return Arrays
-        .asList(new Abseil[] { newFixedTaskAbseilBuilder(Integer.MAX_VALUE, TimeUnit.MINUTES).build(),
-            newPooledTaskAbseilBuilder(Integer.MAX_VALUE, TimeUnit.MINUTES).build(),
-            newSingleTaskAbseilBuilder(Integer.MAX_VALUE, TimeUnit.MINUTES).build() });
+    return Arrays.asList(new Abseil[] { Abseil.fixedTaskAbseil(3, Integer.MAX_VALUE, TimeUnit.MINUTES),
+        Abseil.singleTaskAbseil(Integer.MAX_VALUE, TimeUnit.MINUTES) });
   }
 
   /**

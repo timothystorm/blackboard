@@ -2,86 +2,79 @@ package org.storm.abseil;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.storm.abseil.utils.TimeUtils;
+
 /**
  * Decorates a {@link Runnable} and captures execution vitals.
  */
-class RunnableMonitor implements Runnable {
-  /**
-   * Optional callback to get details once this {@link Runnable} terminates.
-   */
-  interface Listener {
-    void accept(RunnableMonitor timedRunnable);
-  }
+public class RunnableMonitor {
+  private final AtomicLong _active  = new AtomicLong();
+  private final AtomicLong _average = new AtomicLong();
+  private final AtomicLong _count   = new AtomicLong();
+  private final AtomicLong _startAt = new AtomicLong();
 
-  private static volatile AtomicLong _active  = new AtomicLong();
-  private static volatile AtomicLong _average = new AtomicLong();
-  private static volatile AtomicLong _count   = new AtomicLong();
-  private final AtomicLong           _endAt   = new AtomicLong();
-  private final Listener             _listener;
-  private final Runnable             _run;
-  private final AtomicLong           _startAt = new AtomicLong();
+  private static class Monitored implements Runnable {
+    private final Runnable        _runnable;
+    private final RunnableMonitor _observer;
 
-  RunnableMonitor(Runnable run) {
-    this(run, null);
-  }
+    private Monitored(Runnable runnable, RunnableMonitor observer) {
+      _runnable = runnable;
+      _observer = observer;
+    }
 
-  RunnableMonitor(Runnable run, Listener listener) {
-    _run = run;
-    _listener = listener;
-  }
+    @Override
+    public void run() {
+      final long startAt = System.currentTimeMillis();
 
-  Long getAverageRuntime() {
-    return _average.get();
-  }
-
-  private void after() {
-    try {
-      _endAt.set(System.currentTimeMillis());
-      _active.decrementAndGet();
-
-      // calculate moving average
-      _average.updateAndGet((avg) -> {
-        long count = getTotalCount();
-        return (avg * (count - 1) + getRuntime()) / count;
-      });
-    } catch (Exception ignore) {} finally {
-      if(_listener != null) _listener.accept(this);
+      try {
+        _runnable.run();
+      } finally {
+        _observer.finish(System.currentTimeMillis() - startAt);
+      }
     }
   }
 
-  private void before() {
+  /**
+   * Callback to signal that a runnable has finished
+   * 
+   * @param runtimeMillis
+   */
+  private void finish(final Long runtimeMillis) {
+    // calculate rolling average
+    final long total = _count.get();
+    _average.updateAndGet((avg) -> (avg * (total - 1) + runtimeMillis) / total);
+  }
+
+  public Runnable monitor(Runnable runnable) {
     _startAt.set(System.currentTimeMillis());
     _count.incrementAndGet();
-    _active.incrementAndGet();
+    return new Monitored(runnable, this);
   }
 
-  Long getActiveCount() {
-    return _active.get();
-  }
-
-  Long getTotalCount() {
+  public Long getCount() {
     return _count.get();
   }
 
-  Long getRuntime() {
-    return _endAt.get() - _startAt.get();
+  public Long getActive() {
+    return _active.get();
   }
 
-  Long getEndAt() {
-    return _endAt.get();
+  public Long getAverageRuntime() {
+    return _average.get();
   }
 
-  Long getStartAt() {
-    return _startAt.get();
+  public Long getRuntime() {
+    return System.currentTimeMillis() - _startAt.get();
   }
 
   @Override
-  public void run() {
-    try {
-      before();
-      _run.run();
-    } finally {
-      after();
-    }
+  public String toString() {
+    ToStringBuilder str = new ToStringBuilder(this, ToStringStyle.JSON_STYLE);
+    str.append("count", getCount());
+    str.append("active", getActive());
+    str.append("average", TimeUtils.formatMillis(getAverageRuntime()));
+    return str.toString();
   }
 }

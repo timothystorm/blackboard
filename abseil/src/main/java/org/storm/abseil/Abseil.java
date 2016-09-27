@@ -1,11 +1,17 @@
 package org.storm.abseil;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,33 +27,28 @@ import org.storm.abseil.runnable.RunnableSupplier;
  * Like a physical abseil this helps the user prevent run away or locked process; both of which are easy to do when
  * thread programming.
  * </p>
+ * <p>
+ * The creation of Abseils is done with the {@link AbseilBuilder2} which provides logical defaults for all required
+ * abseil attributes.
+ * </p>
  * 
  * @author Timothy Storm
  */
 public class Abseil {
-  private final AtomicInteger _count = new AtomicInteger();
+
+  public interface Observer {
+    void done();
+  }
 
   /**
-   * Executes the {@link Runnable}s in the {@link RunnableSupplier}
+   * Executes the {@link Runnable}s of this {@link Abseil}
    */
-  private class AbseilTask implements Runnable, RunnableMonitor.Listener {
-    /** active tasks, this is not exact but is a best effort answer */
-    private final AtomicLong      _active  = new AtomicLong();
-
-    /** average execution time of strategy tasks */
-    private final AtomicLong      _average = new AtomicLong();
-
+  private class AbseilTaskExecutor implements Runnable {
     /** executor that does the work of executing the strategy tasks */
     private final ExecutorService _executor;
 
-    AbseilTask(ExecutorService executor) {
+    AbseilTaskExecutor(ExecutorService executor) {
       _executor = executor;
-    }
-
-    @Override
-    public void accept(final RunnableMonitor monitor) {
-      _active.set(monitor.getActiveCount());
-      _average.set(monitor.getAverageRuntime());
     }
 
     /**
@@ -83,9 +84,9 @@ public class Abseil {
     public void run() {
       init();
 
-      Runnable run = null;
-      while (getState().is(State.RUNNING) && (run = _runnableFactory.get()) != null) {
-        _executor.execute(new RunnableMonitor(run, this));
+      Runnable task = null;
+      while (getState().is(State.RUNNING) && (task = _tasks.get()) != null) {
+        _executor.execute(_monitor.monitor(task));
       }
 
       shutdown(true);
@@ -109,14 +110,16 @@ public class Abseil {
 
           // configure terminate timeout by using either the min/max wait or the average execution time of other tasks,
           // as long as that average is between the min/max wait bounds.
-          long wait = _average.get() * _active.get();
-          long median = Math.min(Math.max(wait, _minWait), _maxWait);
+          long wait = _monitor.getAverageRuntime() * _monitor.getActive();
+          long median = Math.min(Math.max(wait, MIN_TERMINATE_WAIT), MAX_TERMINATE_WAIT);
           _executor.awaitTermination(median, TimeUnit.MILLISECONDS);
 
-          if (_executor.isTerminated()) transitionTo(State.SHUTDOWN);
-          else kill(/* forcefully kill this thread */);
+          if (!_executor.isTerminated()) kill(/* forcefully kill this thread */);
         } catch (InterruptedException e) {
           return;
+        } finally {
+          transitionTo(State.SHUTDOWN);
+          if(_observer != null) _observer.done();
         }
       }
     }
@@ -143,6 +146,91 @@ public class Abseil {
   }
 
   /**
+   * Builds {@link Abseil}s with logical defaults but can be customized to a clients requirments.
+   */
+  public static class Builder {
+    private ThreadFactory            _factory;
+    private RejectedExecutionHandler _handler;
+    private Long                     _keepAliveMillis;
+    private Long                     _maxRuntimeMillis;
+    private Integer                  _minThreads, _maxThreads;
+    private BlockingQueue<Runnable>  _queue;
+
+    public Builder() {}
+
+    public Abseil build() {
+      return new Abseil(this);
+    }
+
+    private ExecutorService getExecutorService() {
+      // capture and set executor attributes
+      int minThreads = (_minThreads == null || _minThreads <= 0) ? 1 : _minThreads;
+      int maxThreads = (_maxThreads == null || _maxThreads <= 0) ? 1 : _maxThreads;
+      long keepAliveMillis = (_keepAliveMillis == null || _keepAliveMillis <= 0) ? TimeUnit.SECONDS.toMillis(1)
+          : _keepAliveMillis;
+      BlockingQueue<Runnable> queue = (_queue == null) ? new LinkedBlockingQueue<>(maxThreads) : _queue;
+      ThreadFactory factory = (_factory == null) ? ((r) -> new Thread(r, "Abseil - task")) : _factory;
+      RejectedExecutionHandler handler = (_handler == null) ? new CallerRunsPolicy() : _handler;
+
+      return new ThreadPoolExecutor(minThreads, maxThreads, keepAliveMillis, TimeUnit.MILLISECONDS, queue, factory,
+          handler);
+    }
+
+    private long getMaxRuntimeMillis() {
+      return _maxRuntimeMillis == null ? Integer.MAX_VALUE : _maxRuntimeMillis;
+    }
+
+    /**
+     * Duration a thread should be idle before being removed from the pool.
+     * 
+     * @param time
+     * @param unit
+     * @return
+     */
+    public Builder keepAlive(long time, TimeUnit unit) {
+      _keepAliveMillis = unit.toMillis(time);
+      return this;
+    }
+
+    /**
+     * Total time the Abseil should run before shutting down gracefully.
+     * 
+     * @param time
+     * @param unit
+     * @return
+     */
+    public Builder maxRuntime(long time, TimeUnit unit) {
+      _maxRuntimeMillis = unit.toMillis(time);
+      return this;
+    }
+
+    public Builder maxThreads(int maxThreads) {
+      _maxThreads = maxThreads;
+      return this;
+    }
+
+    public Builder minThreads(int minThreads) {
+      _minThreads = minThreads;
+      return this;
+    }
+
+    public Builder rejectedExecutionHandler(RejectedExecutionHandler handler) {
+      _handler = handler;
+      return this;
+    }
+
+    public Builder threadFactory(ThreadFactory factory) {
+      _factory = factory;
+      return this;
+    }
+
+    public Builder workQueue(BlockingQueue<Runnable> queue) {
+      _queue = queue;
+      return this;
+    }
+  }
+
+  /**
    * State of the Abseil
    */
   public enum State {
@@ -164,44 +252,110 @@ public class Abseil {
     }
   }
 
-  private static final Logger log           = LoggerFactory.getLogger(Abseil.class);
+  private static final Logger log                = LoggerFactory.getLogger(Abseil.class);
 
-  /** max runtime millis the abseil should run */
-  private final Long          _maxRuntime;
+  private static final Long   MAX_TERMINATE_WAIT = TimeUnit.SECONDS.toMillis(5);
 
-  /** max time to wait for a shutdown */
-  private Long                _maxWait      = TimeUnit.SECONDS.toMillis(10);
+  private static final Long   MIN_TERMINATE_WAIT = TimeUnit.SECONDS.toMillis(3);
 
-  /** min time to wait for a shutdown */
-  private Long                _minWait      = TimeUnit.SECONDS.toMillis(3);
-
-  /** abseil process that is run apart from the main thread and can be stopped if the abseil task is unresponsive */
-  private Thread              _processor;
-
-  private RunnableSupplier    _runnableFactory;
-
-  /** time this abseil process started */
-  private final AtomicLong    _startAt      = new AtomicLong(Long.MIN_VALUE);
-
-  /** state of this abseil */
-  private State               _state        = State.INIT;
-
-  /** locks state mutation to prevent overlapping transitions */
-  private final Lock          _stateLock    = new ReentrantLock();
-
-  private final AbseilTask    _task;
-
-  /** period sleep duration for the timeout daemon */
-  private Long                _timeoutSleep = TimeUnit.MILLISECONDS.toMillis(500);
+  public static Abseil.Builder builder() {
+    return new Abseil.Builder();
+  }
 
   /**
-   * Creates an {@link Abseil} from parameters in the {@link AbseilBuilder}
+   * At any point, at most tasks will be actively processing. If additional tasks are submitted when all threads are
+   * active, they will wait in the queue until a thread is available. If any thread terminates due to a failure during
+   * execution prior to shutdown, a new one will take its place if needed to execute subsequent tasks. The threads in
+   * the pool will exist until {@link #shutdown()} is called or the client forcefully terminates the application -
+   * (CTNRL +
+   * C)
    * 
-   * @param builder
+   * @param tasks
+   *          - maximum number of active tasks
+   * @return a fixed task {@link Abseil}
    */
-  public Abseil(AbseilBuilder builder) {
-    this(builder.newExecutorService(), builder.getMaxRuntime(), TimeUnit.MILLISECONDS);
+  public static Abseil fixedTaskAbseil(int tasks) {
+    return fixedTaskAbseil(tasks, Integer.MAX_VALUE, TimeUnit.MICROSECONDS);
   }
+
+  /**
+   * At any point, at most tasks will be actively processing. If additional tasks are submitted when all threads are
+   * active, they will wait in the queue until a thread is available. If any thread terminates due to a failure during
+   * execution prior to shutdown, a new one will take its place if needed to execute subsequent tasks. The threads in
+   * the pool will exist until the timeout period passes, {@link #shutdown()} is called or the client forcefully
+   * terminates the application - (CTNRL +
+   * C)
+   * 
+   * @param tasks
+   * @param maxRuntime
+   * @param unit
+   * @return a fixed task {@link Abseil}
+   */
+  public static Abseil fixedTaskAbseil(int tasks, long maxRuntime, TimeUnit unit) {
+    return builder().minThreads(tasks).maxThreads(tasks).maxRuntime(maxRuntime, unit).build();
+  }
+
+  /**
+   * Creates an {@link Abseil} that uses a single worker thread operating
+   * off an unbounded queue. (Note however that if this single
+   * thread terminates due to a failure during execution prior to
+   * shutdown, a new one will take its place if needed to execute
+   * subsequent tasks.) Tasks are guaranteed to execute
+   * sequentially, and no more than one task will be active at any
+   * given time.
+   * 
+   * @return a single task {@link Abseil}
+   */
+  public static Abseil singleTaskAbseil() {
+    return singleTaskAbseil(Integer.MAX_VALUE, TimeUnit.MILLISECONDS);
+  }
+
+  /**
+   * Creates an {@link Abseil} that uses a single worker thread operating
+   * off an unbounded queue. (Note however that if this single
+   * thread terminates due to a failure during execution prior to
+   * shutdown, a new one will take its place if needed to execute
+   * subsequent tasks.) Tasks are guaranteed to execute
+   * sequentially, and no more than one task will be active at any
+   * given time.
+   * 
+   * @param maxRuntime
+   * @param unit
+   * @return a single task {@link Abseil}
+   */
+  public static Abseil singleTaskAbseil(long maxRuntime, TimeUnit unit) {
+    return builder().minThreads(1).maxThreads(1).maxRuntime(maxRuntime, unit).build();
+  }
+
+  /** max runtime millis the abseil should run */
+  private final Long               _maxRuntime;
+
+  /** creates monitored runnables */
+  private final RunnableMonitor    _monitor;
+
+  /** abseil process that is run apart from the main thread and can be stopped if the abseil task is unresponsive */
+  private Thread                   _processor;
+
+  /** time this abseil process started */
+  private final AtomicLong         _startAt      = new AtomicLong(Long.MIN_VALUE);
+
+  /** state of this abseil */
+  private State                    _state        = State.INIT;
+
+  /** locks state mutation to prevent overlapping transitions */
+  private final Lock               _stateLock    = new ReentrantLock();
+
+  /**
+   * 
+   */
+  private final AbseilTaskExecutor _executor;
+
+  private Supplier<Runnable>       _tasks;
+
+  private Abseil.Observer          _observer;
+
+  /** period sleep duration for the timeout daemon */
+  private Long                     _timeoutSleep = TimeUnit.MILLISECONDS.toMillis(500);
 
   /**
    * Creates an {@link Abseil} that uses the provided {@link ExecutorService} to process the tasks and will timeout, if
@@ -214,16 +368,18 @@ public class Abseil {
    * @param unit
    *          - of the maxRuntime
    */
-  public Abseil(ExecutorService executor, long maxRuntime, TimeUnit unit) {
-    assert maxRuntime > 0;
-
-    _maxRuntime = unit.toMillis(maxRuntime);
-    _task = new AbseilTask(executor);
-    _processor = new Thread(_task, "Abseil - processor - " + _count.incrementAndGet());
+  private Abseil(Abseil.Builder builder) {
+    _maxRuntime = builder.getMaxRuntimeMillis();
+    _executor = new AbseilTaskExecutor(builder.getExecutorService());
+    _processor = new Thread(_executor, "Abseil - executor");
+    _monitor = new RunnableMonitor();
   }
 
+  /**
+   * @return current {@link State} of this {@link Abseil}
+   */
   public State getState() {
-    return _task.getState();
+    return _executor.getState();
   }
 
   /**
@@ -236,40 +392,9 @@ public class Abseil {
     Thread.currentThread().interrupt();
   }
 
-  /**
-   * configure the maximum time to wait during a shutdown before a forced shutdown is initiated
-   * 
-   * @param time
-   * @param unit
-   * @return this {@link Abseil} for further configuration
-   */
-  public Abseil maxTimeoutWait(Long time, TimeUnit unit) {
-    assert time >= 0;
-
-    _maxWait = unit.toMillis(time);
-    return this;
-  }
-
-  /**
-   * configure the minimum time to wait during a shutdown before a forced shutdown is initiated
-   * 
-   * @param time
-   * @param unit
-   * @return this this {@link Abseil} for further configuration for further configuration
-   */
-  public Abseil minTimeoutWait(Long time, TimeUnit unit) {
-    assert time >= 0;
-
-    _minWait = unit.toMillis(time);
-    return this;
-  }
-
-  /**
-   * Process the {@link RunnableSupplier}
-   */
-  public void process(final RunnableSupplier runnableFactory) {
-    _runnableFactory = runnableFactory;
-
+  public void process(Abseil.Observer observer, final Supplier<Runnable> tasks) {
+    _observer = observer;
+    _tasks = tasks;
     _startAt.set(System.currentTimeMillis());
 
     // start timeout daemon
@@ -295,9 +420,24 @@ public class Abseil {
   }
 
   /**
+   * <p>
+   * Process the {@link Supplier<Runnable}s. Processing of tasks will terminate under 4 conditions...
+   * </p>
+   * <ul>
+   * <li>{@link Supplier#get()} returns null</li>
+   * <li>The {@link Abseil} has been processing for the max runtime</li>
+   * <li>The client calls {@link #shutdown()}</li>
+   * <li>The program is forcefully terminated; example CNTRL + C.
+   * </ul>
+   */
+  public void process(final Supplier<Runnable> tasks) {
+    process(null, tasks);
+  }
+
+  /**
    * Tries to shutdown the Abseil as fast as possible
    */
   public void shutdown() {
-    _task.shutdown(false);
+    _executor.shutdown(false);
   }
 }
