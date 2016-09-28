@@ -6,18 +6,18 @@ import java.util.function.Supplier;
 
 import org.storm.abseil.runnable.DecoratedRunnable;
 
-public class BurstSupplier extends DecoratedSupplier<Runnable> {
+public class PulseSupplier extends DecoratedSupplier<Runnable> {
   private final AtomicInteger _running = new AtomicInteger();
   private final Integer       _burst;
   private AtomicBoolean       _wait    = new AtomicBoolean(false);
 
-  public BurstSupplier(Supplier<Runnable> supplier, Integer burst) {
+  public PulseSupplier(Supplier<Runnable> supplier, Integer burst) {
     super(supplier);
     _burst = burst;
   }
 
   public static Supplier<Runnable> decorate(Supplier<Runnable> supplier, Integer burst) {
-    return new BurstSupplier(supplier, burst);
+    return new PulseSupplier(supplier, burst);
   }
 
   /**
