@@ -1,8 +1,6 @@
 package org.storm.abseil.cli;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -37,11 +35,6 @@ public class CliBuilder {
    * Optional additional message for usage; displayed after the usage summary but before the options are displayed
    */
   private String            _header;
-
-  /**
-   * Holds the help options. If chosen during parse then the usage message is displayed
-   */
-  private List<String>      _helpOpts        = new ArrayList<>();
 
   /**
    * Underlying options
@@ -156,77 +149,6 @@ public class CliBuilder {
   }
 
   /**
-   * Returns a Builder to create an Option using descriptive methods and tracks this option for 'help' when parsing.
-   * 
-   * @param opt
-   * @return Option.Builder
-   */
-  public Option.Builder help(char opt) {
-    _helpOpts.add(String.valueOf(opt));
-
-    return Option.builder(String.valueOf(opt));
-  }
-
-  /**
-   * Returns a Builder to create an Option using descriptive methods and tracks this option for 'help' when parsing.
-   * 
-   * @param opt
-   * @return Option.Builder
-   */
-  public Option.Builder help(String longOpt) {
-    _helpOpts.add(longOpt);
-
-    return Option.builder().longOpt(longOpt);
-  }
-
-  public Option.Builder help(char shortOpt, String longOpt) {
-    _helpOpts.add(String.valueOf(shortOpt));
-    _helpOpts.add(longOpt);
-
-    return Option.builder(String.valueOf(shortOpt)).longOpt(longOpt);
-  }
-
-  /**
-   * Returns a Builder to create an Option using descriptive methods
-   *
-   * @return Option.Builder
-   */
-  public Option.Builder opt() {
-    return Option.builder();
-  }
-
-  /**
-   * Returns a Builder to create an Option using descriptive methods.
-   *
-   * @param opt
-   * @return Option.Builder
-   */
-  public Option.Builder opt(char opt) {
-    return opt(String.valueOf(opt));
-  }
-
-  /**
-   * Returns a Builder to create an Option using descriptive methods.
-   *
-   * @param opt
-   * @return Option.Builder
-   */
-  public Option.Builder opt(String opt) {
-    return Option.builder(opt);
-  }
-
-  private boolean helpRequested(String[] args) {
-    if (args == null || args.length <= 0) return false;
-    for (String token : args) {
-      int i = token.lastIndexOf("-");
-      if (i < 0) return false;
-
-      if (_helpOpts.contains(token.substring(0, i))) return true;
-    }
-    return false;
-  }
-
-  /**
    * Make options accessible from command line args with parser. The command line is checked to determine if the help
    * option was requested; if yes then the usage message is displayed and null returned.
    *
@@ -238,18 +160,11 @@ public class CliBuilder {
   public CommandLine parse(String[] args) {
     if (_parser == null) _parser = new DefaultParser();
     try {
-      if (helpRequested(args)) {
-        usage();
-        return null;
-      }
-
       CommandLine cmd = _parser.parse(_options, args, _stopOnNonOption);
-
       if (_hasArgs && cmd.getArgs().length <= 0) { throw new ParseException("Missing required argument(s)"); }
       return cmd;
     } catch (ParseException e) {
       _writer.println("error: " + e.getMessage());
-      usage();
       return null;
     }
   }
