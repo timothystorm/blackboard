@@ -5,6 +5,15 @@
 	<artifactId>syspack</artifactId>
 	<version>1.0.0</version>
 
+	<description>
+	<![CDATA[
+	Tools to help identify the tables used in all bind packages, extract data 
+	from those tables and insert that data to different tables.  This was
+	useful for identifying the tables used on FXF-Website during the 
+	QA-Expansion project. 
+	]]>
+	</description>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jdk.version>1.8</jdk.version>
