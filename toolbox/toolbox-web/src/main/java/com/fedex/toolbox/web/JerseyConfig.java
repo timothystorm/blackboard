@@ -12,7 +12,7 @@ import org.joda.time.Duration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import com.fedex.toolbox.web.resource.ConfigurationResource;
+import com.fedex.toolbox.web.resource.ConfigResource;
 import com.fedex.toolbox.web.resource.IndexResource;
 
 /**
@@ -56,7 +56,7 @@ public class JerseyConfig extends ResourceConfig {
         
         // register resources
         register(IndexResource.class);
-        register(ConfigurationResource.class);
+        register(ConfigResource.class);
 
         log.traceExit();
     }
