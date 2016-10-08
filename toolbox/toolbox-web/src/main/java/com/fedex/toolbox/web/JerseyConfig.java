@@ -1,7 +1,5 @@
 package com.fedex.toolbox.web;
 
-import javax.ws.rs.ApplicationPath;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -14,36 +12,37 @@ import org.joda.time.Duration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.fedex.toolbox.web.resource.ConfigurationResource;
+import com.fedex.toolbox.web.resource.IndexResource;
 
 /**
  * Starts the application and initializes components.
  *
  * @author <a href="timothystorm@gmail.com">Timothy Storm</a>
  */
-@ApplicationPath("/")
 public class JerseyConfig extends ResourceConfig {
-    private static final Logger     log      = LogManager.getLogger(JerseyConfig.class);
+  private static final Logger     log      = LogManager.getLogger(JerseyConfig.class);
 
-    protected static final DateTime START_AT = new DateTime(DateTimeZone.UTC);
+  protected static final DateTime START_AT = new DateTime(DateTimeZone.UTC);
 
-    public static DateTime getStartAt() {
-        return START_AT;
-    }
+  public static DateTime getStartAt() {
+    return START_AT;
+  }
 
-    public static Duration getUpTime() {
-        return new Duration(DateTime.now(DateTimeZone.UTC), START_AT);
-    }
+  public static Duration getUpTime() {
+    return new Duration(DateTime.now(DateTimeZone.UTC), START_AT);
+  }
 
-    public JerseyConfig() {
-        log.entry("Starting...");
+  public JerseyConfig() {
+        log.traceEntry();
 
         // bridge between Jersey and Spring
         register(RequestContextFilter.class);
         
         // scan for Jersey resources recursively from this config
-        packages(getClass().getPackage().getName());
+//        packages(getClass().getPackage().getName());
 
-        // Java to<->from JSON
+        // Java <-> JSON
         register(JacksonFeature.class);
         {
             // register mappers
@@ -54,7 +53,11 @@ public class JerseyConfig extends ResourceConfig {
             provider.setMapper(jodaMapper);
             register(provider);
         }
+        
+        // register resources
+        register(IndexResource.class);
+        register(ConfigurationResource.class);
 
-        log.exit();
+        log.traceExit();
     }
 }

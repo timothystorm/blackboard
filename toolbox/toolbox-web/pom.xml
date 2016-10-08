@@ -4,29 +4,26 @@
 	<parent>
 		<groupId>com.fedex</groupId>
 		<artifactId>toolbox</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>1.0.0</version>
 	</parent>
+	
 	<artifactId>toolbox-web</artifactId>
 	<packaging>war</packaging>
 
 	<properties>
 		<javaee-api.version>6.0</javaee-api.version>
-
 		<springframework.version>[4.0,)</springframework.version>
-		<jersey.version>[2.0,)</jersey.version>
+		<jersey.version>2.19</jersey.version>
 		<jackson-datatype-joda.version>2.4.0</jackson-datatype-joda.version>
-		<httpclient.version>[4.5,)</httpclient.version>
 	</properties>
 
 	<dependencies>
-		<!-- Toolbox -->
 		<dependency>
 			<groupId>com.fedex</groupId>
 			<artifactId>toolbox-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- Java EE -->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
@@ -64,14 +61,6 @@
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
 			<version>${jersey.version}</version>
-		</dependency>
-
-		<!-- Test -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 

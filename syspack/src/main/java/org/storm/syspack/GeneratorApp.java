@@ -79,7 +79,7 @@ public class GeneratorApp implements Runnable {
     if (cmd == null) System.exit(-1);
 
     // interrogate
-    _dir = FileUtils.normalize(cmd.getOptionValue('d'));
+    _dir = cmd.hasOption('d') ? FileUtils.normalize(cmd.getOptionValue('d')) : null;
     _packages = Arrays.asList(cmd.getArgs());
 
     // create and populate session
@@ -115,7 +115,7 @@ public class GeneratorApp implements Runnable {
 
     try (BindPackageCsvWriter csv = new BindPackageCsvWriter(writer)) {
       _packages.stream().distinct().sorted().forEach((pkg) -> {
-        _progress.post("[Generating %s]", pkg);
+        _progress.post("[Generating %s]\n", pkg);
         csv.write(_dao.find(pkg));
       });
     } catch (IOException e) {
