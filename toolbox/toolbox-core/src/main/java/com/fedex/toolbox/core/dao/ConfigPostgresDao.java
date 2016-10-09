@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcDaoSupport;
 
@@ -18,18 +19,22 @@ public class ConfigPostgresDao extends NamedParameterJdbcDaoSupport implements C
   }
 
   @Override
-  public String save(String key, String value) {
-    String previous = findOne(key);
+  public Object save(String key, Object value) {
+    Object previous = findOne(key);
     getJdbcTemplate().update("INSERT INTO configuration(key, value) VALUES(?,?)", key, value);
     return previous;
   }
 
   @Override
-  public String findOne(String key) {
-    return getJdbcTemplate().queryForObject("SELECT value FROM configuration where key=?", String.class, key);
+  public Object findOne(String key) {
+    try {
+      return getJdbcTemplate().queryForObject("SELECT value FROM configuration WHERE key = ?", Object.class, key);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
+    }
   }
-  
-  private final RowMapper<Entry<String, Object>> FIND_ALL_MAPPER = new RowMapper<Entry<String, Object>> (){
+
+  private final RowMapper<Entry<String, Object>> FIND_ALL_MAPPER = new RowMapper<Entry<String, Object>>() {
     @Override
     public Entry<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
       return new SimpleEntry<String, Object>(rs.getString(1), rs.getObject(2));

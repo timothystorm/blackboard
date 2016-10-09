@@ -6,5 +6,5 @@ CREATE TABLE configuration (
 	"value" VARCHAR(512) NOT NULL,
 	"created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
-CREATE INDEX ON configuration ((lower(key)));
+CREATE UNIQUE INDEX ON configuration ((lower(key)));
 CREATE INDEX ON configuration ((lower(value)));

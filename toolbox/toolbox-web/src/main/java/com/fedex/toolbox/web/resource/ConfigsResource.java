@@ -11,15 +11,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fedex.toolbox.core.dao.ConfigDao;
 
-@Path("/config")
-public class ConfigResource {
+@Path("/configs")
+public class ConfigsResource {
   @Autowired
   private ConfigDao _dao;
 
@@ -62,15 +61,19 @@ public class ConfigResource {
     Response response = null;
     try {
       _dao.save(key, value);
-      UriBuilder uriBuilder = _uri.getAbsolutePathBuilder();
-      uriBuilder.path(key).queryParam("value", value);
-      response = Response.created(uriBuilder.build()).build();
+      response = Response.created(_uri.getAbsolutePathBuilder().build()).build();
     } catch (Exception e) {
       response = Response.notModified().build();
     }
     return response;
   }
 
+  /**
+   * TODO: Fix issue with resource not being updated
+   * @param key
+   * @param value
+   * @return
+   */
   @PUT
   @Path("/{key}")
   public Response updateConfig(@PathParam("key") String key, @QueryParam("value") String value) {

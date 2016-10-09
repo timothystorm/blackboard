@@ -2,12 +2,14 @@ package com.fedex.toolbox.web;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.configuration.DatabaseConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
+
+import com.fedex.toolbox.core.dao.ConfigDao;
+import com.fedex.toolbox.core.dao.ConfigPostgresDao;
 
 @Configuration
 @PropertySource("classpath:database.properties")
@@ -24,7 +26,7 @@ public class SpringConfig {
   }
 
   @Bean
-  public DatabaseConfiguration databaseConfiguration(final DataSource dataSource) {
-    return new DatabaseConfiguration(dataSource, "configuration", "key", "value");
+  public ConfigDao configDao(final DataSource dataSource) {
+    return new ConfigPostgresDao(dataSource);
   }
 }

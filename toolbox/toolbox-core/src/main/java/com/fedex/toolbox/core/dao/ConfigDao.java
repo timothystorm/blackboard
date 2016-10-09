@@ -13,9 +13,9 @@ public interface ConfigDao {
    *          - to be associated with the specified key
    * @return previous value associated with key, or null if there was no mapping for key
    */
-  String save(String key, String value);
+  Object save(String key, Object value);
 
-  String findOne(String key);
+  Object findOne(String key);
 
   List<Entry<String, Object>> findAll();
 
