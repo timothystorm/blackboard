@@ -1,9 +1,5 @@
 package com.fedex.toolbox.web.resource;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -19,9 +15,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fedex.toolbox.core.bean.Property;
 import com.fedex.toolbox.core.dao.PropertyDao;
-import com.fedex.toolbox.web.hateoas.HateoasProperty;
 
 @Path("/props")
 public class PropertyResource {
@@ -34,19 +28,13 @@ public class PropertyResource {
   @DELETE
   @Path("/{key}")
   public Response delete(@PathParam("key") String key) {
-    return Response.ok().build();
+    return Response.ok(_dao.delete(key)).build();
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public Response get() {
-    List<Property> props = _dao.findAll();
-    List<Property> hateoas = new ArrayList<>(props.size());
-    for (Property p : props) {
-      URI uri = _uri.getAbsolutePathBuilder().path(p.getKey()).build();
-      hateoas.add(new HateoasProperty(p, uri));
-    }
-    return Response.ok(hateoas).build();
+    return Response.ok(_dao.findAll()).build();
   }
 
   @GET
@@ -59,12 +47,13 @@ public class PropertyResource {
   @POST
   @Path("/{key}")
   public Response post(@PathParam("key") String key, @QueryParam("value") String value) {
-    return Response.ok().build();
+    _dao.save(key, value);
+    return Response.created(_uri.getAbsolutePath()).build();
   }
 
   @PUT
   @Path("/{key}")
   protected Response put(String key, String value) {
-    return Response.ok().build();
+    return Response.ok(_dao.save(key, value)).build();
   }
 }
