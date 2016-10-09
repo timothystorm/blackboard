@@ -11,6 +11,8 @@
 	<packaging>war</packaging>
 
 	<properties>
+		<m2eclipse.wtp.contextRoot>/</m2eclipse.wtp.contextRoot>
+		
 		<javaee-api.version>6.0</javaee-api.version>
 		<springframework.version>[4.0,)</springframework.version>
 		<jersey.version>2.19</jersey.version>
@@ -57,7 +59,7 @@
 			<artifactId>jackson-datatype-joda</artifactId>
 			<version>${jackson-datatype-joda.version}</version>
 		</dependency>
-		<dependency>
+		<dependency>	
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-servlet</artifactId>
 			<version>${jersey.version}</version>

@@ -12,8 +12,8 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fedex.toolbox.core.Version;
 import com.fedex.toolbox.core.utils.MachineUtils;
-import com.fedex.toolbox.web.Version;
 
 @Path("/")
 public class IndexResource {

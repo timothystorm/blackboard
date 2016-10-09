@@ -1,10 +1,10 @@
-DROP TABLE IF EXISTS configuration;
+DROP TABLE IF EXISTS properties;
 
-CREATE TABLE configuration (
+CREATE TABLE properties (
 	"id" BIGSERIAL PRIMARY KEY,
 	"key" VARCHAR(64) NOT NULL,
 	"value" VARCHAR(512) NOT NULL,
 	"created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
 );
-CREATE UNIQUE INDEX ON configuration ((lower(key)));
-CREATE INDEX ON configuration ((lower(value)));
+CREATE UNIQUE INDEX ON properties ((lower(key)));
+CREATE INDEX ON properties ((lower(value)));

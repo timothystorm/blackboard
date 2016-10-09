@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 
-import com.fedex.toolbox.core.dao.ConfigDao;
-import com.fedex.toolbox.core.dao.ConfigPostgresDao;
+import com.fedex.toolbox.core.dao.PropertyDao;
+import com.fedex.toolbox.core.dao.PropertyPostgreSqlDao;
 
 @Configuration
 @PropertySource("classpath:database.properties")
@@ -26,7 +26,7 @@ public class SpringConfig {
   }
 
   @Bean
-  public ConfigDao configDao(final DataSource dataSource) {
-    return new ConfigPostgresDao(dataSource);
+  public PropertyDao configDao(final DataSource dataSource) {
+    return new PropertyPostgreSqlDao(dataSource);
   }
 }
