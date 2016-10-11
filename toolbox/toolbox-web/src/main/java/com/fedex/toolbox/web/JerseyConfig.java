@@ -15,8 +15,8 @@ import org.joda.time.Duration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.datatype.joda.JodaMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import com.fedex.toolbox.web.resource.PropertyResource;
 import com.fedex.toolbox.web.resource.IndexResource;
+import com.fedex.toolbox.web.resource.PropertyResource;
 
 /**
  * Starts the application and initializes components.
@@ -24,11 +24,11 @@ import com.fedex.toolbox.web.resource.IndexResource;
  * @author Timothy Storm
  */
 public class JerseyConfig extends ResourceConfig {
-  private static final Logger     log        = LogManager.getLogger(JerseyConfig.class);
+  private static final Logger     log      = LogManager.getLogger(JerseyConfig.class);
 
-  private static final DateFormat UTC_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+  private static final DateFormat ISO_8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-  private static final DateTime   START_AT   = new DateTime(DateTimeZone.UTC);
+  private static final DateTime   START_AT = new DateTime(DateTimeZone.UTC);
 
   public static DateTime getStartAt() {
     return START_AT;
@@ -53,7 +53,7 @@ public class JerseyConfig extends ResourceConfig {
       // register mappers
       JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
       JodaMapper jodaMapper = new JodaMapper();
-      jodaMapper.setDateFormat(UTC_FORMAT);
+      jodaMapper.setDateFormat(ISO_8601);
       jodaMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       provider.setMapper(jodaMapper);
       register(provider);

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configuration>
 <Configuration>
     <Appenders>
         <File name="TOOLBOX" fileName="/var/logs/toolbox-web.log" append="true">
@@ -12,8 +13,8 @@
         <Logger name="com.fedex.toolbox.web" level="error" additivity="false">
             <AppenderRef ref="TOOLBOX" />
         </Logger>
-        <Logger name="org.springframework" level="warn">
-            <AppenderRef ref="TOOLBOX" />
+        <Logger name="org.springframework" level="info">
+            <AppenderRef ref="STDOUT" />
         </Logger>
         <Root level="error">
             <AppenderRef ref="TOOLBOX" />

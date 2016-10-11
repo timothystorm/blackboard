@@ -1,5 +1,6 @@
 package com.fedex.toolbox.web.resource;
 
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,13 +14,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.fedex.toolbox.core.dao.PropertyDao;
 
 @Path("/props")
 public class PropertyResource {
-  @Autowired
+  @Inject
   private PropertyDao _dao;
 
   @Context
@@ -46,14 +45,14 @@ public class PropertyResource {
 
   @POST
   @Path("/{key}")
-  public Response post(@PathParam("key") String key, @QueryParam("value") String value) {
+  public Response post(@PathParam("key") String key, @QueryParam("v") String value) {
     _dao.save(key, value);
     return Response.created(_uri.getAbsolutePath()).build();
   }
 
   @PUT
   @Path("/{key}")
-  protected Response put(String key, String value) {
+  public Response put(@PathParam("key") String key, @QueryParam("v") String value) {
     return Response.ok(_dao.save(key, value)).build();
   }
 }
