@@ -1,0 +1,8 @@
+CREATE TABLE configurations (
+	id BIGINT AUTO_INCREMENT,
+	scope VARCHAR(128) NOT NULL,
+	key VARCHAR(128) NOT NULL,
+	value VARCHAR(255) NOT NULL,
+	
+	PRIMARY KEY(id)
+)

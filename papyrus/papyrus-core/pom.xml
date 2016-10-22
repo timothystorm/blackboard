@@ -10,20 +10,35 @@
   <packaging>jar</packaging>
 
   <properties>
-    <commons-configuration.version>1.10</commons-configuration.version>
+    <commons-configuration2.version>2.1</commons-configuration2.version>
+    <commons-beanutils.version>1.9.3</commons-beanutils.version>
+    <h2.version>1.4.191</h2.version>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>commons-configuration</groupId>
-      <artifactId>commons-configuration</artifactId>
-      <version>${commons-configuration.version}</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>${commons-configuration2.version}</version>
       <exclusions>
         <exclusion>
-         <groupId>commons-logging</groupId>
+          <groupId>commons-logging</groupId>
           <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>${commons-beanutils.version}</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -41,6 +56,25 @@
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+
+      <plugin>
+        <!-- execute with $> mvn flyway:migrate -->
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>4.0.3</version>
+        <configuration>
+          <locations>filesystem:src/test/resources/db/migration</locations>
+          <url>jdbc:h2:file:./target/papyrus</url>
+          <user>sa</user>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>

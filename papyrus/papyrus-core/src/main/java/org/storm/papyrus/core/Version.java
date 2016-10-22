@@ -1,4 +1,4 @@
-package org.storm.papyrus.config;
+package org.storm.papyrus.core;
 
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -24,8 +24,8 @@ public class Version {
    * \\w+       : [build] any number of word characters (optional)
    * </pre>
    */
-  private static final Pattern VERSION_PATTERN = Pattern
-      .compile("([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\-?(\\w+)$");
+  private static final Pattern VERSION_PATTERN = Pattern.compile(
+      "([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\-?(\\w+)$");
 
   public static final String buildVersion() {
     return versionPart(4);
@@ -48,7 +48,8 @@ public class Version {
   private static ClassLoader getDefaultClassLoader() {
     ClassLoader loader = null;
     try {
-      loader = Thread.currentThread().getContextClassLoader();
+      loader = Thread.currentThread()
+                     .getContextClassLoader();
     } catch (Throwable threadclassloader_notfound) {}
 
     if (loader == null) {
@@ -87,10 +88,18 @@ public class Version {
 
   public static void main(String[] args) {
     StringBuilder info = new StringBuilder();
-    info.append("Specification-Title:").append(name()).append(LF);
-    info.append("Specification-Version:").append(version()).append(LF);
-    info.append("Built-At:").append(builtAt()).append(LF);
-    info.append("Built-By:").append(builtBy()).append(LF);
+    info.append("Specification-Title:")
+        .append(name())
+        .append(LF);
+    info.append("Specification-Version:")
+        .append(version())
+        .append(LF);
+    info.append("Built-At:")
+        .append(builtAt())
+        .append(LF);
+    info.append("Built-By:")
+        .append(builtBy())
+        .append(LF);
     System.out.print(info.toString());
   }
 
