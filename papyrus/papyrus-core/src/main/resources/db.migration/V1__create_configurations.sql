@@ -3,6 +3,7 @@ CREATE TABLE configurations (
 	scope VARCHAR(128) NOT NULL,
 	key VARCHAR(128) NOT NULL,
 	value VARCHAR(255) NOT NULL,
+	description VARCHAR(255),
 	
 	PRIMARY KEY(id)
 )
