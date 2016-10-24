@@ -24,10 +24,10 @@
 	</appender>
 
 	<logger name="org.storm.papyrus" level="WARN" additivity="false">
-		<appender-ref ref="ROLLING" />
+		<appender-ref ref="STDOUT" />
 	</logger>
 
 	<root level="WARN">
-		<appender-ref ref="ROLLING" />
+		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

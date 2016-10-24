@@ -51,7 +51,7 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       pstmt.setString(2, key);
       pstmt.setObject(3, value);
       pstmt.executeUpdate();
-      conn.commit();
+      if(!conn.getAutoCommit()) conn.commit();
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.WRITE, ConfigurationEvent.ADD_PROPERTY, key, value, e);
     }
@@ -63,7 +63,7 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       pstmt.setString(1, _scope);
       pstmt.setString(2, key);
       pstmt.executeUpdate();
-      conn.commit();
+      if(!conn.getAutoCommit()) conn.commit();
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.WRITE, ConfigurationEvent.CLEAR_PROPERTY, key, null, e);
     }
@@ -134,7 +134,7 @@ public class PapyrusConfiguration extends AbstractConfiguration {
     try (Connection conn = _dataSource.getConnection(); PreparedStatement pstmt = conn.prepareStatement(COUNT_PROPS)) {
       pstmt.setString(1, _scope);
       try (ResultSet rs = pstmt.executeQuery()) {
-        return rs.next() ? (rs.getInt(1) <= 0) : true;
+        return rs.next() ? (rs.getInt(1) == 0) : true;
       }
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.READ, ConfigurationErrorEvent.READ, null, null, e);

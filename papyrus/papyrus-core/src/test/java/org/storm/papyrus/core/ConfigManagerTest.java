@@ -7,20 +7,36 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.configuration2.Configuration;
-import org.h2.jdbcx.JdbcDataSource;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.postgresql.ds.PGSimpleDataSource;
 
 public class ConfigManagerTest {
+  static final String USER_HOME = System.getProperty("user.home");
 
-  static DataSource _dataSource;
-  Configuration     _config;
+  static DataSource   _dataSource;
+  Configuration       _config;
+
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    Properties props = new Properties();
+    props.load(new FileReader(new File(USER_HOME, "opt/postgresql.properties")));
+
+    PGSimpleDataSource ds = new PGSimpleDataSource();
+    ds.setUrl(props.getProperty("url"));
+    ds.setUser(props.getProperty("username"));
+    ds.setPassword(props.getProperty("password"));
+    _dataSource = ds;
+  }
 
   @Before
   public void before() throws Exception {
@@ -30,19 +46,6 @@ public class ConfigManagerTest {
   @After
   public void after() throws Exception {
     _config = null;
-  }
-
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    JdbcDataSource ds = new JdbcDataSource();
-    ds.setUrl("jdbc:h2:file:./target/papyrus");
-    ds.setUser("sa");
-    _dataSource = ds;
-  }
-
-  @AfterClass
-  public static void afterClass() throws Exception {
-    _dataSource = null;
   }
 
   @Test
@@ -59,7 +62,7 @@ public class ConfigManagerTest {
 
   @Test
   public void saveConfiguration() throws Exception {
-    _config.setProperty("save.test", "new_test_value");
-    assertEquals("new_test_value", _config.getString("save.test"));
+    _config.setProperty("save.test", "test_value");
+    assertEquals("test_value", _config.getProperty("save.test"));
   }
 }

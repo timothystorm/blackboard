@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <V>
  */
 public class SoftCache<K, V> {
-  /** keep a soft reference cache to allow gc if memory gets low **/
+  /** keep a soft reference to allow gc if memory gets low **/
   private final transient Map<K, SoftReference<CacheEntry<K, V>>> _cache    = new ConcurrentHashMap<>();
   private final ReferenceQueue<CacheEntry<K, V>>                  _refQueue = new ReferenceQueue<>();
 
