@@ -6,27 +6,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.junit.After;
-import org.junit.Before;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
-import org.storm.papyrus.core.SoftCache;
 
 public class SoftCacheTest {
 
-  SoftCache<Object, Object> cache;
-
-  @Before
-  public void setUp() throws Exception {
-    cache = new SoftCache<>();
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    cache = null;
-  }
-
   @Test
   public void exceedMemory() throws Exception {
+    Cache<Object, Object> cache = new SoftCache<>();
+
     cache.put("myKey", "myValue");
     assertNotNull(cache.get("myKey"));
 
@@ -41,13 +30,29 @@ public class SoftCacheTest {
   }
 
   @Test
+  public void expire() throws Exception {
+    SoftCache<Object, Object> cache = new SoftCache<>(100, TimeUnit.MILLISECONDS);
+    cache.put("myKey", "myValue", 100, TimeUnit.MILLISECONDS);
+    assertNotNull(cache.get("myKey"));
+
+    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+
+    assertNull(cache.get("myKey"));
+    assertFalse(cache.contains("myKey"));
+  }
+
+  @Test
   public void put() throws Exception {
+    Cache<Object, Object> cache = new SoftCache<>();
+
     assertNull(cache.put("myKey", "myFirstValue"));
     assertEquals("myFirstValue", cache.put("myKey", "mySecondValue"));
   }
-  
+
   @Test
   public void remove() throws Exception {
+    Cache<Object, Object> cache = new SoftCache<>();
+
     assertNull(cache.put("myKey", "myValue"));
     assertEquals("myValue", cache.remove("myKey"));
     assertNull(cache.get("myKey"));

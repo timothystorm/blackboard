@@ -17,7 +17,7 @@ public class ConfigManager {
   private static final Logger                    log    = LoggerFactory.getLogger(ConfigManager.class);
 
   /** keep a soft reference cache to allow gc if memory gets low **/
-  private final SoftCache<String, Configuration> _cache = new SoftCache<>();
+  private final Cache<String, Configuration> _cache = new SoftCache<>();
 
   public ConfigManager(DataSource dataSource) {
     _dataSource = dataSource;
@@ -30,7 +30,7 @@ public class ConfigManager {
    *          - filter of properties
    * @param dataSource
    *          - to connect to the correct DB
-   * @return configuration linked to the DB
+   * @return configuration linked to the DB - never null but possibly empty
    */
   public Configuration getPapyrusConfiguration(final String scope) {
     Configuration config = _cache.get(scope);
