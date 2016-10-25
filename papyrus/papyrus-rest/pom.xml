@@ -7,7 +7,7 @@
 		<version>0.0.0</version>
 	</parent>
 
-	<artifactId>papyrus-web</artifactId>
+	<artifactId>papyrus-rest</artifactId>
 	<packaging>war</packaging>
 
 	<build>

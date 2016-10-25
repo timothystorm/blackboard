@@ -8,7 +8,7 @@
 
   <modules>
     <module>papyrus-core</module>
-    <module>papyrus-web</module>
+    <module>papyrus-rest</module>
     <module>papyrus-ejb</module>
     <module>papyrus-ear</module>
   </modules>
