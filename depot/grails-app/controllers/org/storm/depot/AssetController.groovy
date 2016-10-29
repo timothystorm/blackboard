@@ -1,7 +1,7 @@
 package org.storm.depot
 
 class AssetController {
-  SessionFactory sessionFactory
+  def sessionFactory
 
   def create() {
     def assets = Asset.list()
@@ -10,8 +10,8 @@ class AssetController {
 
   def delete() {
     with{asset -> 
-      removeAssociations(asset)
-      asset.delete() 
+      removeAsset(asset)
+      asset.delete(flush:true) 
       redirect action:'index'
     }
   }
@@ -30,7 +30,8 @@ class AssetController {
 
   def save() {
     def asset = new Asset(params)
-    upsave(asset)
+    asset.save()
+    addAsset(asset)
     redirect action:'show', id:asset.id
   }
 
@@ -40,27 +41,38 @@ class AssetController {
 
   def update() {
     with{asset ->
-      removeAssociations(asset)
-
-      // capture new asset params and save
-      upsave((asset.properties = params))
+      removeAsset(asset)
+      asset.properties = params
+      asset.save(flush:true) 
+      addAsset(asset)
       redirect action:'show', id:asset.id
     }
   }
 
   /**
-   * Utility to update/save an Asset and adding child/parent associations
+   * Add assets xref
    */
-  private def upsave(Asset asset){
-    if(asset.save()) addAssociations(asset)
+  private def addAsset(Asset asset) {
+    iter(asset.assets, {it.addToAssetOf(asset).save()})
+    iter(asset.assetOf, {it.addToAssets(asset).save()})
+    sessionFactory.getCurrentSession().flush()
   }
 
-   /** 
-    * Utility finds the specified Asset and if found executes the closure with
-    * the found Asset as an arg
-    */
-  private def with(id='id', Closure closure) {
-    def asset = Asset.get(params[id])
+  /** 
+   * Remove assets xref 
+   */
+  private def removeAsset(Asset asset) {
+    iter(asset.assets, {it.removeFromAssetOf(asset).save()})
+    iter(asset.assetOf, {it.removeFromAssets(asset).save()})
+    sessionFactory.getCurrentSession().flush()
+  }
+
+  /** 
+   * Utility finds the specified Asset and if found executes the closure with
+   * the found Asset as an arg
+   */
+  private def with(Closure closure) {
+    def asset = Asset.get(params['id'])
     if(asset) closure(asset)
     else {
       flash.message = "Asset not found"
@@ -68,17 +80,16 @@ class AssetController {
     }
   }
 
-  private def addAssociations(Asset asset) {
-    // add cross reference assets
-    asset.assets?.each{it.removeFromAssetOf(asset).save()}
-    asset.assetOf?.each{it.removeFromAssets(asset).save()}
-    sessionFactory?.getCurrentSession()?.flush()
-  }
-
-  private def removeAssociations(Asset asset) {
-    // remove cross reference assets
-    asset.assets?.each{it.removeFromAssetOf(asset).save()}
-    asset.assetOf?.each{it.removeFromAssets(asset).save()}
-    sessionFactory?.getCurrentSession()?.flush()
+  /**
+   * thread save iteration of list which uses a
+   * traditional iterator instead of a functional
+   * iterator to prevent concurrent modifications
+   * errors
+   */
+  private def iter(def list, Closure closure) {
+    if(list) {
+      def arr = []
+      if(arr.addAll(list)) arr.each{closure(it)}
+    }
   }
 }

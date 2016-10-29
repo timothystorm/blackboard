@@ -18,7 +18,7 @@ class Asset {
     static constraints = {
         eai nullable:false, required:true, unique:true, min:0
         name nullable:false, required:true, maxSize:64
-        desc nullable:true, required:false
+        desc nullable:true, required:false, maxSize:512
         assets nullable:true
         assetOf nullable:true
     }

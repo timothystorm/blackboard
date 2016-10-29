@@ -37,10 +37,10 @@
                         <label for="desc">Description</label><g:textArea name="desc" value="${asset?.desc}"/>
                     </div>
                     <div class="fieldcontain">
-                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" optionKey="id" optionValue="${{'('+it.eai+') '+it.name}}" multiple="true"/>
+                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" optionKey="id" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
                     </div>
                     <div class="fieldcontain">
-                        <label for="assetOf">Asset Of</label><g:select name="assetOf" from="${assetOf}" optionKey="id" optionValue="${{'('+it.eai+') '+it.name}}" multiple="true"/>
+                        <label for="assetOf">Asset Of</label><g:select name="assetOf" from="${assetOf}" optionKey="id" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
                     </div>
                 </fieldset>
                 <fieldset class="buttons">
