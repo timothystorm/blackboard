@@ -10,7 +10,7 @@ class AssetController {
 
   def delete() {
     with{asset -> 
-      removeAsset(asset)
+      unlink(asset)
       asset.delete(flush:true) 
       redirect action:'index'
     }
@@ -31,7 +31,7 @@ class AssetController {
   def save() {
     def asset = new Asset(params)
     asset.save()
-    addAsset(asset)
+    link(asset)
     redirect action:'show', id:asset.id
   }
 
@@ -41,10 +41,10 @@ class AssetController {
 
   def update() {
     with{asset ->
-      removeAsset(asset)
+      unlink(asset)
       asset.properties = params
       asset.save(flush:true) 
-      addAsset(asset)
+      link(asset)
       redirect action:'show', id:asset.id
     }
   }
@@ -52,7 +52,7 @@ class AssetController {
   /**
    * Add assets xref
    */
-  private def addAsset(Asset asset) {
+  private def link(Asset asset) {
     iter(asset.assets, {it.addToAssetOf(asset).save()})
     iter(asset.assetOf, {it.addToAssets(asset).save()})
     sessionFactory.getCurrentSession().flush()
@@ -61,7 +61,7 @@ class AssetController {
   /** 
    * Remove assets xref 
    */
-  private def removeAsset(Asset asset) {
+  private def unlink(Asset asset) {
     iter(asset.assets, {it.removeFromAssetOf(asset).save()})
     iter(asset.assetOf, {it.removeFromAssets(asset).save()})
     sessionFactory.getCurrentSession().flush()
