@@ -28,7 +28,7 @@
             <g:form action="save">
                 <fieldset class="form">
                     <div class="fieldcontain required">
-                        <label for"eai">EAI</label><g:field type="number" name="eai" value="${asset?.eai}" required="true" maxlength/>
+                        <label for"eai">EAI</label><g:field type="number" name="eai" value="${asset?.eai}" required="true" />
                     </div>
                     <div class="fieldcontain required">
                         <label for="name">Name</label><g:field type="text" name="name" value="${asset?.name}" required="true"/>
