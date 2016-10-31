@@ -28,7 +28,7 @@
             <g:form action="save">
                 <fieldset class="form">
                     <div class="fieldcontain required">
-                        <label for"eai">EAI</label><g:field type="number" name="eai" value="${asset?.eai}" required="true"/>
+                        <label for"eai">EAI</label><g:field type="number" name="eai" value="${asset?.eai}" required="true" maxlength/>
                     </div>
                     <div class="fieldcontain required">
                         <label for="name">Name</label><g:field type="text" name="name" value="${asset?.name}" required="true"/>
@@ -37,10 +37,7 @@
                         <label for="desc">Description</label><g:textArea name="desc" value="${asset?.desc}"/>
                     </div>
                     <div class="fieldcontain">
-                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" optionKey="id" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
-                    </div>
-                    <div class="fieldcontain">
-                        <label for="assetOf">Asset Of</label><g:select name="assetOf" from="${assetOf}" optionKey="id" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
+                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" optionKey="eai" optionValue="${{it.eai+' - '+it.name}}" multiple="true" size="${Math.min(assets.size(), 10)}"/>
                     </div>
                 </fieldset>
                 <fieldset class="buttons">

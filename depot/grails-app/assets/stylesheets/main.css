@@ -445,13 +445,17 @@ th.desc a {
     background: #f7f7f7;
 }
 
+tbody tr:nth-child(odd) {
+   background: #f7f7f7;
+}
+
 .even {
     background: #ffffff;
 }
-
+/*
 th:hover, tr:hover {
     background: #79b94c;
-}
+}*/
 
 /* PAGINATION */
 

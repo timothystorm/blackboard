@@ -26,8 +26,8 @@
                 </g:eachError>
             </ul>
             </g:hasErrors>
-            <g:form resource="${this.asset}" method="PUT">
-                <g:hiddenField name="version" value="${this.asset?.version}" />
+            <g:form resource="${asset}" method="PUT" id="${asset.eai}">
+                <g:hiddenField name="version" value="${asset?.version}" />
                 <fieldset class="form">
                     <div class="fieldcontain required">
                         <label for"eai">EAI</label><g:field type="number" name="eai" value="${asset?.eai}" required="true"/>
@@ -39,10 +39,7 @@
                         <label for="desc">Description</label><g:textArea name="desc" value="${asset?.desc}"/>
                     </div>
                     <div class="fieldcontain">
-                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" value="${asset?.assets*.id}" optionKey="id" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
-                    </div>
-                    <div class="fieldcontain">
-                        <label for="assetOf">Asset Of</label><g:select name="assetOf" from="${assetOf}" value="${asset?.assetOf*.id}" optionKey="id" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
+                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" value="${asset?.assets*.eai}" optionKey="eai" optionValue="${{it.eai+' -  '+it.name}}" multiple="true"/>
                     </div>
                 </fieldset>
                 <fieldset class="buttons">

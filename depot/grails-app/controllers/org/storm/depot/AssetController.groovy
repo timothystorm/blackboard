@@ -30,9 +30,9 @@ class AssetController {
 
   def save() {
     def asset = new Asset(params)
-    asset.save()
+    asset.save(flush:true)
     link(asset)
-    redirect action:'show', id:asset.id
+    redirect action:'show', id:asset.eai
   }
 
   def show() {
@@ -45,7 +45,7 @@ class AssetController {
       asset.properties = params
       asset.save(flush:true) 
       link(asset)
-      redirect action:'show', id:asset.id
+      redirect action:'show', id:asset.eai
     }
   }
 

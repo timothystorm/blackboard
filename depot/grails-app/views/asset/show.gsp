@@ -36,7 +36,7 @@
                     <span class="property-label">Assets</span>
                     <div class="property-value">
                     <g:each in="${asset?.assets}" var="a">
-                        <div><g:link action="show" id="${a.id}">${+a.eai+' - '+a.name}</g:link></div>
+                        <div><g:link action="show" id="${a.eai}">${+a.eai+' - '+a.name}</g:link></div>
                     </g:each>
                     </div>
                 </li>
@@ -44,14 +44,14 @@
                     <span class="property-label">Asset Of</span>
                     <div class="property-value">
                     <g:each in="${asset?.assetOf}" var="a">
-                        <div><g:link action="show" id="${a.id}">${+a.eai+' - '+a.name}</g:link></div>
+                        <div><g:link action="show" id="${a.eai}">${+a.eai+' - '+a.name}</g:link></div>
                     </g:each>
                     </div>
                 </li>
             </ol>
-            <g:form resource="${this.asset}" method="DELETE">
+            <g:form resource="${asset}" method="DELETE" id="${asset.eai}">
                 <fieldset class="buttons">
-                    <g:link class="edit" action="edit" resource="${this.asset}"><g:message code="default.button.edit.label" default="Edit" /></g:link>
+                    <g:link class="edit" action="edit" id="${asset.eai}"><g:message code="default.button.edit.label" default="Edit" /></g:link>
                     <input class="delete" type="submit" value="${message(code: 'default.button.delete.label', default: 'Delete')}" onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');" />
                 </fieldset>
             </g:form>

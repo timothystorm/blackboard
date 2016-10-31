@@ -31,17 +31,17 @@
                 <tbody>
                 <g:each in="${assets}" var="asset">
                     <tr>
-                        <td><g:link action="show" id="${asset.id}">${asset.eai}</g:link></td>
-                        <td><g:link action="show" id="${asset.id}">${asset.name}</g:link></td>
+                        <td><g:link action="show" id="${asset.eai}">${asset.eai}</g:link></td>
+                        <td><g:link action="show" id="${asset.eai}">${asset.name}</g:link></td>
                         <td>${asset.desc}</td>
                         <td>
                         <g:each in="${asset.assets}" var="a">
-                            <div><g:link action="show" id="${a.id}">${+a.eai+' - '+a.name}</g:link></div>
+                            <div><g:link action="show" id="${a.eai}">${+a.eai+' - '+a.name}</g:link></div>
                         </g:each>
                         </td>
                         <td>
                         <g:each in="${asset.assetOf}" var="a">
-                            <div><g:link action="show" id="${a.id}">${+a.eai+' - '+a.name}</g:link></div>
+                            <div><g:link action="show" id="${a.eai}">${+a.eai+' - '+a.name}</g:link></div>
                         </g:each>
                         </td>
                     </tr>
