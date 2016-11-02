@@ -1,22 +1,25 @@
 package org.storm.vault
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 /**
- * Primary domain of Vault and hold the identity information about a
- * Resource.
+ * Primary domain of Vault and holds the information about a Resource.
  *
  * @author Timothy Storm
  */
 @EqualsAndHashCode(includes = 'eai')
+@ToString(includeNames = true, includePackage = false, includes = ['eai', 'name', 'detail', 'assets'])
 class Resource implements Serializable {
   Long eai
   String name
 
   static hasMany = [assets:Asset]
   static mappedBy = [assets:'root']
+  static hasOne = [detail:Detail]
   static constraints = {
-    name nullable:false, required:true, maxSize:64
+    name required:true, nullable:false, maxSize:64
+    assets required:false, nullable:true
   }
   static mapping = {
     id name:'eai', generator:'assigned'
@@ -53,9 +56,5 @@ class Resource implements Serializable {
    */ 
   def beforeDelete() {
     Asset.remove(this)
-  }
-
-  String toString() {
-    "Resource(eai:${eai}, name:${name}, assets:${assets})"
   }
 }

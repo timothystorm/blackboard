@@ -201,8 +201,8 @@ fieldset,
 .fieldcontain label,
 .fieldcontain .property-label {
     color: #666666;
-    text-align: right;
-    width: 25%;
+    text-align: left;
+    width: 20%;
 }
 
 .fieldcontain .property-label {
@@ -225,10 +225,6 @@ input, select, textarea {
     border: 1px solid #cccccc;
     font-size: 1em;
     padding: 0.2em 0.4em;
-}
-
-select {
-    padding: 0.2em 0.2em 0.2em 0;
 }
 
 select[multiple] {
@@ -255,6 +251,10 @@ input:focus, select:focus, textarea:focus {
     -moz-box-shadow: 0 0 0.5em #ffffff;
     -webkit-box-shadow: 0 0 0.5em #ffffff;
     box-shadow: 0 0 0.5em #ffffff;
+}
+
+input[type=number], input[type=password], input[type=text], textarea, select {
+  min-width: 24em;
 }
 
 .required-indicator {
@@ -441,12 +441,16 @@ th.desc a {
     background: #f7f7f7;
 }
 
+tbody tr:nth-child(odd) {
+   background: #f7f7f7;
+}
+
 .even {
     background: #ffffff;
 }
 
-th:hover, tr:hover {
-    background: #79b94c;
+th:hover, tr:hover, tr:nth-child(odd):hover {
+    background: #d6ffd1;
 }
 
 /* PAGINATION */

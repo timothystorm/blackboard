@@ -26,11 +26,12 @@ class Asset implements Serializable {
     executeUpdate("DELETE FROM Asset WHERE root=:resource OR asset=:resource", [resource:resource])
   }
 
+  /**
+   * removes the root resource and all dependant assets
+   * 
+   * @param resource - to be deleted 
+   */
   static def removeRoot(Resource resource) {
     executeUpdate("DELETE FROM Asset WHERE root=:resource", [resource:resource])
-  }
-
-  String toString() {
-    "Asset(root:${root.eai}, asset:${asset.eai})"
   }
 }

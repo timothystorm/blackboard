@@ -12,6 +12,7 @@ class ResourceController {
 
   def edit() {
     with { resource -> 
+      // exclude self in resource lists
       def resources = Resource.list().findAll { it != resource }
       [resource:resource, assets:resources, assetOf:resources]
     }
@@ -45,7 +46,7 @@ class ResourceController {
 
   private def upsert(Resource resource) {
     // securely capture resource params
-    resource.properties['eai', 'name'] = params
+    resource.properties['eai', 'name', 'detail'] = params
 
     // add assets
     Resource.getAll(params.assets).each{ resource.addToAssets(it) }

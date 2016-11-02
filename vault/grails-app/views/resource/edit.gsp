@@ -9,7 +9,6 @@
         <a href="#edit-resource" class="skip" tabindex="-1"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
         <div class="nav" role="navigation">
             <ul>
-                <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
                 <li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]" /></g:link></li>
                 <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
             </ul>
@@ -35,8 +34,14 @@
                     <div class="fieldcontain required">
                         <label for="name">Name</label><g:field type="text" name="name" value="${resource?.name}" required="true"/>
                     </div>
+                    <div class="fieldcontain required">
+                        <label for="detail.disposition">Disposition</label><g:select name="detail.disposition" from="${org.storm.vault.Disposition.values()}" value="${resource?.detail?.disposition}" />
+                    </div>
                     <div class="fieldcontain">
-                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" value="${resource.assets?.asset*.eai}" optionKey="eai" optionValue="${{it.eai+' - '+it.name}}" multiple="true"/>
+                        <label for="assets">Assets</label><g:select name="assets" from="${assets}" value="${resource.assets?.asset*.eai}" optionKey="eai" optionValue="${{it.eai+' - '+it.name}}" multiple="true" size="${Math.max(Math.min(3, resource.assets?.size()), 10)}"/>
+                    </div>
+                    <div class="fieldcontain">
+                        <label for="detai.desc">Description</label><g:textArea name="detail.desc" value="${resource?.detail?.desc}" rows="5" cols="40"/>
                     </div>
                 </fieldset>
                 <fieldset class="buttons">
