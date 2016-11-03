@@ -253,7 +253,7 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 0.5em #ffffff;
 }
 
-input[type=number], input[type=password], input[type=text], textarea, select {
+input[type=number], input[type=password], input[type=text], input[type=email], textarea, select {
   min-width: 24em;
 }
 

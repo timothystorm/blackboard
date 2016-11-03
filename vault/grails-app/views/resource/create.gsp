@@ -32,16 +32,24 @@
                   <div class="fieldcontain required">
                     <label for="name">Name</label><g:field type="text" name="name" value="${resource?.name}" required="true"/>
                   </div>
-                  <div class="fieldcontain required">
-                    <label for="detail.disposition">Disposition</label><g:select name="detail.disposition" from="${org.storm.vault.Disposition.values()}" value="${resource?.detail?.disposition}"/>
-                  </div>
                   <g:if test="${assets}">
                       <div class="fieldcontain">
                         <label for="assets">Assets</label><g:select name="assets" from="${assets}" optionKey="eai" optionValue="${{it.eai+' - '+it.name}}" multiple="true" size="${Math.max(Math.min(3, assets?.size()), 10)}" />
                       </div>
                   </g:if>
+
+                  <g:if test="${contacts}">
+                    <div class="fieldcontain">
+                    <label for="contacts">Contacts</label><g:select name="contacts" from="${contacts}" optionValue="${{it.ldap+' - '+it.name?.family+', '+it.name?.given}}" multiple="true" size="${Math.max(Math.min(3, contacts?.size()), 10)}" optionKey="ldap"/>
+                    </div>
+                  </g:if>
+
                   <div class="fieldcontain">
-                    <label for="detai.desc">Description</label><g:textArea name="detail.desc" value="${resource?.detail?.desc}" rows="5" cols="40"/>
+                    <label>&nbsp;</label><g:link action="create" controller="contact">Create New Contact</g:link>
+                  </div>
+
+                  <div class="fieldcontain">
+                    <label for="detai.desc">Description</label><g:textArea name="desc" value="${resource?.desc}" rows="5" cols="40"/>
                   </div>
                 </fieldset>
                 <fieldset class="buttons">

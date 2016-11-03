@@ -9,21 +9,20 @@ import groovy.transform.ToString
  * @author Timothy Storm
  */
 @EqualsAndHashCode(includes = 'eai')
-@ToString(includeNames = true, includePackage = false, includes = ['eai', 'name', 'detail', 'assets'])
+@ToString(includeNames = true, includePackage = false, includes = ['eai', 'name', 'desc', 'contacts', 'assets'])
 class Resource implements Serializable {
-  Long eai
-  String name
-
-  static hasMany = [assets:Asset]
+  BigInteger eai
+  String name, desc
+  
+  static hasMany = [assets:Asset, contacts:Contact]
   static mappedBy = [assets:'root']
-  static hasOne = [detail:Detail]
-  static constraints = {
+  static constraints = { 
+    assets required:false, nullable:true 
+    contacts required:false, nullable:true
+    desc required:false, nullable:true, maxSize:512
     name required:true, nullable:false, maxSize:64
-    assets required:false, nullable:true
   }
-  static mapping = {
-    id name:'eai', generator:'assigned'
-  }
+  static mapping = { id name:'eai', generator:'assigned' }
 
   /**
    * @return Resources this is an asset of
@@ -33,12 +32,11 @@ class Resource implements Serializable {
   }
 
   /**
-   * clears assets 
+   * clears assets and contacts
    */
   def clear() {
-    assets?.clear()
     Asset.removeRoot(this)
-    return this
+    contacts?.clear()
   }
 
   /** 
@@ -52,7 +50,7 @@ class Resource implements Serializable {
   }
 
   /**
-   * removes this Resource from Asset 
+   * removes this Resource as a root/asset 
    */ 
   def beforeDelete() {
     Asset.remove(this)

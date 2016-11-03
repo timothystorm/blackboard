@@ -25,12 +25,14 @@
               </li>
               <li class="fieldcontain">
                 <span class="property-label">Name</span>
-                <div class="property-value">${resource?.name}</div>
+                <div class="property-value">${resource.name}</div>
               </li>
+              <g:if test="${resource?.contacts}">
               <li class="fieldcontain">
-                <span class="property-label">Disposition</span>
-                <div class="property-value">${resource?.detail?.disposition}</div>
+                <span class="property-label">Contacts</span>
+                <div class="property-value"><g:select name="contacts" from="${resource.contacts}" optionValue="${{it.ldap+' - '+it.name?.family+', '+it.name?.given}}" multiple="true" size="${Math.max(Math.min(3, resource.contacts?.size()), 10)}" optionKey="ldap" disabled="true"/></div>
               </li>
+              </g:if>
               <g:if test="${resource.assets}">
               <li class="fieldcontain">
                 <span class="property-label">Assets</span>
@@ -47,10 +49,10 @@
                 </div>
               </li>
               </g:if>
-              <g:if test="${resource?.detail.desc}">
+              <g:if test="${resource?.desc}">
                 <li class="fieldcontain">
                   <span class="property-label">Description</span>
-                  <div class="property-value">${resource?.detail?.desc}</div>
+                  <div class="property-value">${resource.desc}</div>
                 </li>
               </g:if>
             </ol>

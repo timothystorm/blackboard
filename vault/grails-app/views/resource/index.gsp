@@ -23,9 +23,9 @@
                     <tr>
                         <g:sortableColumn property="eai" title="EAI"/>
                         <g:sortableColumn property="name" title="Name"/>
-                        <g:sortableColumn property="detail.disposition" title="Disposition"/>
                         <th>Assets</th>
                         <th>Asset Of</th>
+                        <th>Contacts</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,15 +33,20 @@
                         <tr>
                             <td><g:link action="show" id="${resource.eai}">${resource?.eai}</g:link></td>
                             <td><g:link action="show" id="${resource.eai}">${resource?.name}</g:link></td>
-                            <td>${resource?.detail?.disposition}</td>
                             <td>
-                            <g:each in="${resource.assets}" var="a">
-                                <div><g:link action="show" id="${a.asset.eai}">${a.asset.eai+' - '+a.asset.name}</g:link></div>
+                            <g:each in="${resource.assets}" var="asset">
+                                <div><g:link action="show" id="${asset.asset.eai}">${asset.asset.eai+' - '+asset.asset?.name}</g:link></div>
                             </g:each>
                             </td>
                             <td>
-                            <g:each in="${resource.assetOf}" var="a">
-                                <div><g:link action="show" id="${a.root.eai}">${a.root.eai+' - '+a.root.name}</g:link></div>
+                            <g:each in="${resource.assetOf}" var="asset">
+                                <div><g:link action="show" id="${asset.root.eai}">${asset.root.eai+' - '+asset.root?.name}</g:link></div>
+                            </g:each>
+                            </td>
+                            <td>
+                            <g:each in="${resource.contacts}" var="contact">
+                                <div><g:link action="show" id="${contact.ldap}" controller="contact">${contact.ldap} - ${contact.name?.family}, ${contact.name?.given}</g:link>
+                                </div>
                             </g:each>
                             </td>
                         </tr>
