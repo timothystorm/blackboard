@@ -34,27 +34,25 @@
               <g:if test="${resource.assets}">
               <li class="fieldcontain">
                 <span class="property-label">Assets</span>
-                <div class="property-value" style="overflow-y: scroll; height:100px; border:1px solid #ccc; padding: 4px">
-                  <g:each in="${resource?.assets}" var="a">
-                    <div><g:link action="show" id="${a.asset.eai}">${a.asset.eai+' - '+a.asset.name}</g:link></div>
-                  </g:each>
+                <div class="property-value">
+                  <g:select name="assets" from="${resource?.assets*.asset}" optionKey="eai" optionValue="${{it.eai+' - '+it.name}}" multiple="true" size="${Math.max(Math.min(3, resource.assets?.size()), 10)}" disabled="true"/>
                 </div>
               </li>
               </g:if>
               <g:if test="${resource.assetOf}">
               <li class="fieldcontain">
                 <span class="property-label">Asset Of</span>
-                <div class="property-value" style="overflow-y: scroll; height:100px; border:1px solid #ccc; padding: 4px">
-                  <g:each in="${resource?.assetOf}" var="a">
-                    <div><g:link action="show" id="${a.root.eai}">${a.root.eai+' - '+a.root.name}</g:link></div>
-                  </g:each>
+                <div class="property-value">
+                  <g:select name="assets" from="${resource?.assetOf*.root}" optionKey="eai" optionValue="${{it.eai+' - '+it.name}}" multiple="true" size="${Math.max(Math.min(3, resource.assetOf?.size()), 10)}" disabled="true"/>
                 </div>
               </li>
               </g:if>
-              <li class="fieldcontain">
-                <span class="property-label">Description</span>
-                <div class="property-value">${resource?.detail?.desc}</div>
-              </li>
+              <g:if test="${resource?.detail.desc}">
+                <li class="fieldcontain">
+                  <span class="property-label">Description</span>
+                  <div class="property-value">${resource?.detail?.desc}</div>
+                </li>
+              </g:if>
             </ol>
             <g:form resource="${resource}" method="DELETE" id="${resource?.eai}">
                 <fieldset class="buttons">

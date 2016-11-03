@@ -52,8 +52,10 @@ class ResourceController {
     Resource.getAll(params.assets).each{ resource.addToAssets(it) }
 
     // save
-    if(resource.save()) redirect action:'show', id:resource.eai
-    else {
+    if(resource.save()){
+      flash.message = "Resource ${params.eai} saved"
+      redirect action:'index'
+    } else {
       flash.message = "failed to save '${params.eai}'"
       redirect action:'index'
     }
