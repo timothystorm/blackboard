@@ -1,6 +1,7 @@
 package org.storm.vault
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.PackageScope
 
 /**
  * XREF of Resource dependencies.  Should not be used directly but
@@ -22,6 +23,7 @@ class Asset implements Serializable {
      *
      * @param resource - to be deleted
      */
+    @PackageScope
     static def remove(Resource resource) {
         executeUpdate("DELETE FROM Asset WHERE root=:resource OR asset=:resource", [resource: resource])
     }
@@ -31,6 +33,7 @@ class Asset implements Serializable {
      *
      * @param resource - to be deleted
      */
+    @PackageScope
     static def removeRoot(Resource resource) {
         executeUpdate("DELETE FROM Asset WHERE root=:resource", [resource: resource])
     }

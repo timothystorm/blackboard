@@ -26,7 +26,7 @@
     <li class="fieldcontain">
       <span class="property-label">LDAP</span>
 
-      <div class="property-value">${contact?.ldap}</div>
+      <div class="property-value"><a href="mailto:${contact.email}">${contact?.ldap}</a></div>
     </li>
     <li class="fieldcontain">
       <span class="property-label">Name</span>
@@ -36,14 +36,15 @@
     <li class="fieldcontain">
       <span class="property-label">Email</span>
 
-      <div class="property-value">${contact.email}</div>
+      <div class="property-value"><a href="mailto:${contact.email}">${contact.email}</a></div>
     </li>
     <li class="fieldcontain">
       <span class="property-label">Resources</span>
 
-      <div class="property-value"><g:select name="resources" from="${contact.resources}"
-                                            optionValue="${{ it.eai + ' - ' + it.name }}" multiple="true" size="4"
-                                            optionKey="eai" disabled="true"/></div>
+      <div class="property-value scrollable">
+        <g:each in="${contact.resources}">
+          <div><g:link action="show" controller="resource" id="${it.eai}">${it.eai} - ${it.name}</g:link></div>
+        </g:each>
     </li>
   </ol>
   <g:form resource="${contact}" method="DELETE" id="${contact.ldap}">

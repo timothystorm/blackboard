@@ -2,7 +2,7 @@ package org.storm.vault
 
 class ResourceController {
     def create() {
-        [resource: new Resource(), assets: Resource.list(), contacts: Contact.list(), components:Component.list()]
+        [resource: new Resource(), assets: Resource.list(), contacts: Contact.list()]
     }
 
     def delete() {
@@ -17,7 +17,7 @@ class ResourceController {
         with { resource ->
             // exclude self in resource lists
             def resources = Resource.list().findAll { it != resource }
-            [resource: resource, assets: resources, assetOf: resources, contacts: Contact.list(), components:Component.list()]
+            [resource: resource, assets: resources, assetOf: resources, contacts: Contact.list()]
         }
     }
 
@@ -26,7 +26,7 @@ class ResourceController {
     }
 
     def save() {
-        upsert(new Resource())
+        upsave(new Resource())
     }
 
     def show() {
@@ -36,20 +36,25 @@ class ResourceController {
     def update() {
         with { resource ->
             resource.clear()
-            upsert(resource)
+            upsave(resource)
         }
     }
 
-    private def upsert(Resource resource) {
-        // securely capture resource params
+    /**
+     * updates or saves resource by assigning request params to the resource
+     * @param resource - to be updated/saved
+     * @return a redirect to action:index
+     */
+    private def upsave(Resource resource) {
+        // securely capture resource params with subscript operator
         resource.properties['eai', 'name', 'desc', 'contacts', 'components'] = params
 
         // update assets
         Resource.getAll(params.assets).each { resource.addToAssets(it) }
 
         // save
-        if (resource.save(failOnError: true)) flash.message = "Resource ${params.eai} saved"
-        else flash.message = "Failed to save '${params.eai}'"
+        if (resource.save(failOnError: true)) flash.message = "Resource ${resource.eai} - ${resource.name} saved"
+        else flash.message = "Failed to save resource"
 
         redirect action: 'index'
     }

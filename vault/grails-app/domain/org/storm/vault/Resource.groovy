@@ -14,31 +14,15 @@ class Resource implements Serializable {
     BigInteger eai
     String name, desc
 
-    static hasMany = [assets: Asset, contacts: Contact, components: Component]
+    static hasMany = [assets: Asset, contacts: Contact]
     static mappedBy = [assets: 'root']
     static constraints = {
         assets required: false, nullable: true
         contacts required: false, nullable: true
-        components required: false, nullable: true
         desc required: false, nullable: true, maxSize: 512
         name required: true, nullable: false, maxSize: 64
     }
     static mapping = { id name: 'eai', generator: 'assigned' }
-
-    /**
-     * @return Resources this is an asset of
-     */
-    def getAssetOf() {
-        Asset.findAllByAsset(this)
-    }
-
-    /**
-     * clears assets and contacts
-     */
-    def clear() {
-        Asset.removeRoot(this)
-        contacts?.clear()
-    }
 
     /**
      * Adds a resource as an asset to this
@@ -55,5 +39,23 @@ class Resource implements Serializable {
      */
     def beforeDelete() {
         Asset.remove(this)
+    }
+
+    /**
+     * clears assets and contacts
+     */
+    def clear() {
+        // remove self-reference association
+        Asset.removeRoot(this)
+
+        // clear lists
+        contacts?.clear()
+    }
+
+    /**
+     * @return Resources this is an asset of
+     */
+    def getAssetOf() {
+        Asset.findAllByAsset(this)
     }
 }

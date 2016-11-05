@@ -35,46 +35,46 @@
     <g:hiddenField name="version" value="${resource.version}"/>
     <fieldset class="form">
       <div class="fieldcontain required">
-        <label for="eai">EAI</label><g:field type="number" name="eai" value="${resource.eai}" required="true"/>
+        <label for="eai">EAI</label><g:field type="number"
+                                             name="resource.eai"
+                                             value="${resource?.eai}"
+                                             disabled="true"/>
       </div>
 
       <div class="fieldcontain required">
-        <label for="name">Name</label><g:field type="text" name="name" value="${resource.name}" required="true"/>
+        <label for="name">Name</label><g:field type="text"
+                                               name="resource.name"
+                                               value="${resource?.name}"
+                                               required="true"/>
       </div>
 
       <div class="fieldcontain">
-        <label for="detai.desc">Description</label><g:textArea name="desc" value="${resource.desc}" rows="5" cols="40"/>
+        <label for="detail.desc">Description</label><g:textArea name="resource.desc"
+                                                                value="${resource?.desc}"
+                                                                rows="3"/>
       </div>
+
+      <g:if test="${assets}">
+        <div class="fieldcontain">
+          <label for="assets">Assets</label><g:select name="resource.assets"
+                                                      from="${assets}"
+                                                      optionKey="eai"
+                                                      optionValue="${{ it.eai + ' - ' + it.name }}"
+                                                      multiple="true"
+                                                      size="4"/>
+        </div>
+      </g:if>
 
       <div class="fieldcontain">
-        <label for="assets">Assets</label><g:select name="assets" from="${assets}"
-                                                    value="${resource.assets?.asset*.eai}" optionKey="eai"
-                                                    optionValue="${{ it.eai + ' - ' + it.name }}" multiple="true"
-                                                    size="${Math.max(Math.min(3, resource.assets?.size()), 10)}"/>
-      </div>
+        <label for="contacts">
+          <g:link action="create" controller="contact" title="Create New Contact">Contacts</g:link>
+        </label><g:select name="resource.contacts"
+                          from="${contacts}"
+                          optionKey="ldap"
+                          optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
+                          multiple="true"
+                          size="4"/>
 
-      <div class="fieldcontain">
-        <label for="components"><g:link action="create" controller="component"
-                                        title="Create New Component">Components</g:link></label><g:select
-          name="components" from="${components}"
-          value="${resource.components*.id}"
-          optionKey="id"
-          optionValue="${{ '[' it.type + '] ' + it.name }}"
-          multiple="true"
-          size="${Math.max(Math.min(3, (components ? components.size() : 0)), 10)}"/>
-      </div>
-
-      <div class="fieldcontain required">
-        <label for="contacts"><g:link action="create" controller="contact"
-                                      title="Create New Contact">Contacts</g:link></label>
-        <g:select name="contacts"
-                  from="${contacts}"
-                  optionValue="${{
-                    it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given
-                  }}" multiple="true"
-                  size="${Math.max(Math.min(3, contacts?.size()), 10)}"
-                  optionKey="ldap"
-                  value="${resource.contacts*.ldap}"/>
       </div>
     </fieldset>
     <fieldset class="buttons">

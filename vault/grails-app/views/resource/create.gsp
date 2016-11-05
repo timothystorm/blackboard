@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'resource.label', default: 'Resource')}"/>
-  <title><g:message code="default.create.label" args="[entityName]"/></title>
+  <title>Create Resource</title>
 </head>
 
 <body>
@@ -33,49 +32,51 @@
   <g:form action="save">
     <fieldset class="form">
       <div class="fieldcontain required">
-        <label for="eai">EAI</label><g:field type="number" name="eai" value="${resource?.eai}" required="true"/>
+        <label for="eai">EAI</label><g:field type="number"
+                                             name="eai"
+                                             value="${resource?.eai}"
+                                             required="true"/>
       </div>
 
       <div class="fieldcontain required">
-        <label for="name">Name</label><g:field type="text" name="name" value="${resource?.name}" required="true"/>
+        <label for="name">Name</label><g:field type="text"
+                                               name="name"
+                                               value="${resource?.name}"
+                                               required="true"/>
       </div>
 
       <div class="fieldcontain">
-        <label for="detail.desc">Description</label><g:textArea name="desc" value="${resource?.desc}" rows="5"
-                                                                cols="40"/>
+        <label for="detail.desc">Description</label><g:textArea name="desc"
+                                                                value="${resource?.desc}"
+                                                                rows="3"/>
       </div>
 
       <g:if test="${assets}">
         <div class="fieldcontain">
-          <label for="assets">Assets</label><g:select name="assets" from="${assets}" optionKey="eai"
-                                                      optionValue="${{ it.eai + ' - ' + it.name }}" multiple="true"
-                                                      size="${Math.max(Math.min(3, assets?.size()), 10)}"/>
+          <label for="assets">Assets</label><g:select name="assets"
+                                                      from="${assets}"
+                                                      optionKey="eai"
+                                                      optionValue="${{ it.eai + ' - ' + it.name }}"
+                                                      multiple="true"
+                                                      size="4"/>
         </div>
       </g:if>
 
-      <span class="components">
-        <div class="fieldcontain">
-          <label for="components"><g:link action="create" controller="component"
-                                          title="Create New Component">Components</g:link></label>
-          <g:select name="components" from="${components}" optionValue="${{
-            '[' it.type + '] ' + it.name
-          }}" multiple="true" size="${Math.max(Math.min(3, (components ? components.size() : 0)), 10)}" optionKey="id"/>
-        </div>
-      </span>
+      <div class="fieldcontain">
+        <label for="contacts">
+          <g:link action="create" controller="contact" title="Create New Contact">Contacts</g:link>
+        </label><g:select name="contacts"
+                          from="${contacts}"
+                          optionKey="ldap"
+                          optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
+                          multiple="true"
+                          size="4"/>
 
-      <span class="contacts">
-        <div class="fieldcontain">
-          <label for="contacts"><g:link action="create" controller="contact"
-                                        title="Create New Contact">Contacts</g:link></label>
-          <g:select name="contacts" from="${contacts}" optionValue="${{
-            it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given
-          }}" multiple="true" size="${Math.max(Math.min(3, (contacts ? contacts.size : 0)), 10)}" optionKey="ldap"/>
-
-        </div>
-      </span>
+      </div>
     </fieldset>
     <fieldset class="buttons">
-      <g:submitButton name="create" class="save"
+      <g:submitButton name="create"
+                      class="save"
                       value="${message(code: 'default.button.create.label', default: 'Create')}"/>
     </fieldset>
   </g:form>

@@ -30,7 +30,6 @@
       <th>Assets</th>
       <th>Asset Of</th>
       <th><g:link action="index" controller="contact">Contacts</g:link></th>
-      <th>Components</th>
     </tr>
     </thead>
     <tbody>
@@ -55,11 +54,6 @@
             <div><g:link action="show" id="${contact.ldap}"
                          controller="contact">${contact.ldap} - ${contact.name?.family}, ${contact.name?.given}</g:link>
             </div>
-          </g:each>
-        </td>
-        <td>
-          <g:each in="${resource.components}" var="component">
-            <div>[${component.type}] ${component.name}</div>
           </g:each>
         </td>
       </tr>

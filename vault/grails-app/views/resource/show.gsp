@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'resource.label', default: 'Resource')}"/>
-  <title><g:message code="default.show.label" args="[entityName]"/></title>
+  <title>${resource.eai}</title>
 </head>
 
 <body>
@@ -12,8 +11,8 @@
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
-    <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></li>
+    <li><g:link class="list" action="index">List Resources</g:link></li>
+    <li><g:link class="create" action="create">New Resource</g:link></li>
   </ul>
 </div>
 
@@ -26,52 +25,60 @@
     <li class="fieldcontain">
       <span class="property-label">EAI</span>
 
-      <div class="property-value">${resource?.eai}</div>
+      <div class="property-value">${resource.eai}</div>
     </li>
     <li class="fieldcontain">
       <span class="property-label">Name</span>
 
       <div class="property-value">${resource.name}</div>
     </li>
-    <g:if test="${resource?.contacts}">
-      <li class="fieldcontain">
-        <span class="property-label">Contacts</span>
 
-        <div class="property-value"><g:select name="contacts" from="${resource.contacts}" optionValue="${{
-          it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given
-        }}" multiple="true" size="${Math.max(Math.min(3, resource.contacts?.size()), 10)}" optionKey="ldap"
-                                              disabled="true"/></div>
-      </li>
-    </g:if>
-    <g:if test="${resource.assets}">
-      <li class="fieldcontain">
-        <span class="property-label">Assets</span>
+    <li class="fieldcontain">
+      <span class="property-label">Description</span>
 
-        <div class="property-value">
-          <g:select name="assets" from="${resource?.assets*.asset}" optionKey="eai"
-                    optionValue="${{ it.eai + ' - ' + it.name }}" multiple="true"
-                    size="${Math.max(Math.min(3, resource.assets?.size()), 10)}" disabled="true"/>
-        </div>
-      </li>
-    </g:if>
-    <g:if test="${resource.assetOf}">
-      <li class="fieldcontain">
-        <span class="property-label">Asset Of</span>
+      <div class="property-value multi-line">
+        <g:textArea name="resource.desc" value="${resource.desc}" disabled="true"/>
+      </div>
+    </li>
 
-        <div class="property-value">
-          <g:select name="assets" from="${resource?.assetOf*.root}" optionKey="eai"
-                    optionValue="${{ it.eai + ' - ' + it.name }}" multiple="true"
-                    size="${Math.max(Math.min(3, resource.assetOf?.size()), 10)}" disabled="true"/>
-        </div>
-      </li>
-    </g:if>
-    <g:if test="${resource?.desc}">
-      <li class="fieldcontain">
-        <span class="property-label">Description</span>
+    <li class="fieldcontain">
+      <span class="property-label">Assets</span>
 
-        <div class="property-value">${resource.desc}</div>
-      </li>
-    </g:if>
+      <div class="property-value">
+        <g:select name="assets"
+                  from="${resource.assets*.asset}"
+                  optionValue="${{ it.eai + ' - ' + it.name }}"
+                  multiple="true"
+                  size="4"
+                  disabled="true"/>
+      </div>
+    </li>
+
+    <li class="fieldcontain">
+      <span class="property-label">Contacts</span>
+
+      <div class="property-value">
+        <g:select name="contacts"
+                  from="${resource.contacts}"
+                  optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
+                  multiple="true"
+                  size="4"
+                  disabled="true"/>
+      </div>
+    </li>
+
+    <li class="fieldcontain">
+      <span class="property-label">Asset Of</span>
+
+      <div class="property-value">
+        <g:select name="assets"
+                  from="${resource.assetOf*.root}"
+                  optionValue="${{ it.eai + ' - ' + it.name }}"
+                  multiple="true"
+                  size="4"
+                  disabled="true"/>
+      </div>
+    </li>
   </ol>
   <g:form resource="${resource}" method="DELETE" id="${resource?.eai}">
     <fieldset class="buttons">
