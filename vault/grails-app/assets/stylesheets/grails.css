@@ -8,7 +8,7 @@ html, body {
     -webkit-overflow-scrolling: touch;
 }
 
-p, ul, pre, h1, h2, h3, h4, h5, h6, h7, h8 {
+p, ul, pre, h1, h2, h3, h4, h5, h6 {
     margin: 1em 0;
 }
 
@@ -16,7 +16,7 @@ p {
     display: block;
 }
 
-h1, h2, h3, h4, h5, h6, h7, h8 {
+h1, h2, h3, h4, h5, h6 {
     font-weight: bold;
 }
 
@@ -393,7 +393,7 @@ body, html {
 }
 
 a {
-    color: #db4800;
+    /*color: #db4800;*/
     text-decoration: underline;
 }
 
@@ -432,15 +432,6 @@ h6 {
     font-size: 1.08em;
     font-weight: normal;
     color: #db4800;
-}
-
-h7 {
-    font-weight: bold;
-    color: #245f78;
-}
-
-h8 {
-    color: #245f78;
 }
 
 #footer {

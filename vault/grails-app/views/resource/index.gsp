@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'resource.label', default: 'Resource')}"/>
-  <title><g:message code="default.list.label" args="[entityName]"/></title>
+  <title>Components</title>
 </head>
 
 <body>
@@ -12,8 +11,7 @@
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="create" action="create"><g:message code="default.new.label"
-                                                          args="[entityName]"/></g:link></li>
+    <li><g:link class="create" action="create">Create Component</g:link></li>
   </ul>
 </div>
 
@@ -22,44 +20,53 @@
     <div class="message" role="status">${flash.message}</div>
   </g:if>
 
-  <table>
-    <thead>
-    <tr>
-      <g:sortableColumn property="eai" title="EAI"/>
-      <g:sortableColumn property="name" title="Name"/>
-      <th>Assets</th>
-      <th>Asset Of</th>
-      <th><g:link action="index" controller="contact">Contacts</g:link></th>
-    </tr>
-    </thead>
-    <tbody>
-    <g:each in="${resources}" var="resource">
+  <g:if test="${resources}">
+    <table>
+      <thead>
       <tr>
-        <td><g:link action="show" id="${resource.eai}">${resource?.eai}</g:link></td>
-        <td><g:link action="show" id="${resource.eai}">${resource?.name}</g:link></td>
-        <td>
-          <g:each in="${resource.assets}" var="asset">
-            <div><g:link action="show"
-                         id="${asset.asset.eai}">${asset.asset.eai + ' - ' + asset.asset?.name}</g:link></div>
-          </g:each>
-        </td>
-        <td>
-          <g:each in="${resource.assetOf}" var="asset">
-            <div><g:link action="show"
-                         id="${asset.root.eai}">${asset.root.eai + ' - ' + asset.root?.name}</g:link></div>
-          </g:each>
-        </td>
-        <td>
-          <g:each in="${resource.contacts}" var="contact">
-            <div><g:link action="show" id="${contact.ldap}"
-                         controller="contact">${contact.ldap} - ${contact.name?.family}, ${contact.name?.given}</g:link>
-            </div>
-          </g:each>
-        </td>
+        <g:sortableColumn property="eai" title="EAI"/>
+        <g:sortableColumn property="name" title="Name"/>
+        <th>Assets</th>
+        <th>Asset Of</th>
+        <th><g:link action="index" controller="contact">Contacts</g:link></th>
+        <th><g:link action="index" controller="component">Components</g:link></th>
       </tr>
-    </g:each>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+      <g:each in="${resources}" var="resource">
+        <tr>
+          <td><g:link action="show" id="${resource.eai}">${resource?.eai}</g:link></td>
+          <td><g:link action="show" id="${resource.eai}">${resource?.name}</g:link></td>
+          <td>
+            <g:each in="${resource.assets}" var="asset">
+              <div><g:link action="show"
+                           id="${asset.asset.eai}">${asset.asset.eai + ' - ' + asset.asset?.name}</g:link></div>
+            </g:each>
+          </td>
+          <td>
+            <g:each in="${resource.assetOf}" var="asset">
+              <div><g:link action="show"
+                           id="${asset.root.eai}">${asset.root.eai + ' - ' + asset.root?.name}</g:link></div>
+            </g:each>
+          </td>
+          <td>
+            <g:each in="${resource.contacts}" var="contact">
+              <div><g:link action="show" id="${contact.ldap}"
+                           controller="contact">${contact.ldap} - ${contact.name?.family}, ${contact.name?.given}</g:link>
+              </div>
+            </g:each>
+          </td>
+          <td>
+            <g:each in="${resource.components}" var="component">
+              <div><g:link action="show" controller="component"
+                           id="${component.id}">[${component.type}] ${component.name}</g:link></div>
+            </g:each>
+          </td>
+        </tr>
+      </g:each>
+      </tbody>
+    </table>
+  </g:if>
 </div>
 </body>
 </html>

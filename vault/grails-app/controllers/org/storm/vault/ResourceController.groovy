@@ -2,7 +2,7 @@ package org.storm.vault
 
 class ResourceController {
     def create() {
-        [resource: new Resource(), assets: Resource.list(), contacts: Contact.list()]
+        [resource: new Resource(), assets: Resource.list(), contacts: Contact.list(), components: Component.list()]
     }
 
     def delete() {
@@ -17,7 +17,7 @@ class ResourceController {
         with { resource ->
             // exclude self in resource lists
             def resources = Resource.list().findAll { it != resource }
-            [resource: resource, assets: resources, assetOf: resources, contacts: Contact.list()]
+            [resource: resource, assets: resources, assetOf: resources, contacts: Contact.list(), components: Component.list()]
         }
     }
 

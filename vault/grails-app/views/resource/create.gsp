@@ -11,7 +11,7 @@
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
+    <li><g:link class="list" action="index">Component List</g:link></li>
   </ul>
 </div>
 
@@ -72,6 +72,17 @@
                           multiple="true"
                           size="4"/>
 
+      </div>
+
+      <div class="fieldcontain">
+        <label for="components">
+          <g:link action="create" controller="component" title="Create New Component">Components</g:link>
+        </label><g:select name="components"
+                          from="${components}"
+                          optionKey="id"
+                          optionValue="${{ '[' + it.type + '] ' + it.name }}"
+                          multiple="true"
+                          size="4"/>
       </div>
     </fieldset>
     <fieldset class="buttons">

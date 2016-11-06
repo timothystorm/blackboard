@@ -9,16 +9,17 @@ import groovy.transform.ToString
  * @author Timothy Storm
  */
 @EqualsAndHashCode(includes = 'eai')
-@ToString(includeNames = true, includePackage = false, includes = ['eai', 'name', 'desc', 'contacts', 'assets'])
+@ToString(includeNames = true, includePackage = false, includes = ['eai', 'name', 'desc', 'contacts', 'assets', 'components'])
 class Resource implements Serializable {
     BigInteger eai
     String name, desc
 
-    static hasMany = [assets: Asset, contacts: Contact]
+    static hasMany = [assets: Asset, contacts: Contact, components: Component]
     static mappedBy = [assets: 'root']
     static constraints = {
         assets required: false, nullable: true
         contacts required: false, nullable: true
+        components required: false, nullable: true
         desc required: false, nullable: true, maxSize: 512
         name required: true, nullable: false, maxSize: 64
     }
@@ -42,7 +43,7 @@ class Resource implements Serializable {
     }
 
     /**
-     * clears assets and contacts
+     * clears assets, contacts and components
      */
     def clear() {
         // remove self-reference association
@@ -50,6 +51,7 @@ class Resource implements Serializable {
 
         // clear lists
         contacts?.clear()
+        components?.clear()
     }
 
     /**

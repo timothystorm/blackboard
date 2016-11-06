@@ -1,8 +1,6 @@
 package org.storm.vault
 
 class ContactController {
-    def scaffold = Contact
-
     def create() {
         [contact: new Contact()]
     }
@@ -25,6 +23,10 @@ class ContactController {
 
     def save() {
         upsert(new Contact())
+    }
+
+    def show() {
+        with { contact -> [contact: contact] }
     }
 
     def update() {

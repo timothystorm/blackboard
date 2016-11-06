@@ -2,8 +2,7 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'contact.label', default: 'Contact')}"/>
-  <title><g:message code="default.create.label" args="[entityName]"/></title>
+  <title>Create Contact</title>
 </head>
 
 <body>
@@ -12,8 +11,7 @@
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="list" action="index" controller="contact"><g:message code="default.list.label"
-                                                                            args="[entityName]"/></g:link></li>
+    <li><g:link class="list" action="index" controller="contact">Contact List</g:link></li>
   </ul>
 </div>
 
