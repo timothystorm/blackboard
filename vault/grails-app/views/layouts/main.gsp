@@ -18,24 +18,18 @@
 <div class="navbar navbar-default navbar-static-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
       <a class="navbar-brand" href="/resource/">
         <g:message code="vault.title"/>
       </a>
     </div>
-
-    <div class="navbar-collapse collapse" aria-expanded="false" style="height: 0.8px;">
-      <ul class="nav navbar-nav navbar-right">
-        <g:pageProperty name="page.navigation"/>
-      </ul>
-    </div>
   </div>
 </div>
+
+<ul class="topnav">
+  <li><g:link action="index" controller="resource"><g:message code="vault.label.resources"/></g:link></li>
+  <li><g:link action="index" controller="contact"><g:message code="vault.label.contacts"/></g:link></li>
+  <li><g:link action="index" controller="component"><g:message code="vault.title.components"/></g:link></li>
+</ul>
 
 <g:layoutBody/>
 
