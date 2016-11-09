@@ -1,14 +1,15 @@
+<%@ page import="org.springframework.validation.FieldError" %>
+<%@ page import="org.storm.vault.Component.Type" %>
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'component.label', default: 'Component')}"/>
-  <title><g:message code="default.edit.label" args="[entityName]"/></title>
+  <title>Edit Component</title>
 </head>
 
 <body>
-<a href="#edit-component" class="skip" tabindex="-1"><g:message code="default.link.skip.label"
-                                                                default="Skip to content&hellip;"/></a>
+<a href="#edit-component" class="skip" tabindex="-1">Skip to content&hellip;</a>
 
 <div class="nav" role="navigation">
   <ul>
@@ -23,19 +24,36 @@
   <g:if test="${flash.message}">
     <div class="message" role="status">${flash.message}</div>
   </g:if>
-  <g:hasErrors bean="${this.component}">
+  <g:hasErrors bean="${component}">
     <ul class="errors" role="alert">
-      <g:eachError bean="${this.component}" var="error">
-        <li<g:if
-               test="${error in org.springframework.validation.FieldError}">data-field-id="${error.field}"</g:if>><g:message
-            error="${error}"/></li>
-      </g:eachError>
+    <g:eachError bean="${component}" var="error">
+      <li<g:if
+        test="${error in FieldError}">data-field-id="${error.field}"</g:if>><g:message
+        error="${error}"/></li>
+    </g:eachError>
     </ul>
   </g:hasErrors>
-  <g:form resource="${this.component}" method="PUT">
-    <g:hiddenField name="version" value="${this.component?.version}"/>
+  <g:form resource="${component}" method="PUT">
+    <g:hiddenField name="version" value="${component?.version}"/>
     <fieldset class="form">
-      <f:all bean="component"/>
+      <div class="fieldcontain required">
+        <label for="type">Type</label><g:select from="${Type}"
+                                                name="type"
+                                                value="${component.type}"/>
+      </div>
+
+      <div class="fieldcontain required">
+        <label for="name">Name</label><g:field type="text"
+                                               name="name"
+                                               value="${component.name}"
+                                               required="true"/>
+      </div>
+
+      <div class="fieldcontain">
+        <label for="detail">Detail</label><g:textArea name="detail"
+                                                      value="${component?.detail}"
+                                                      rows="3"/>
+      </div>
     </fieldset>
     <fieldset class="buttons">
       <input class="save" type="submit" value="${message(code: 'default.button.update.label', default: 'Update')}"/>

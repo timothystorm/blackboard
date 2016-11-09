@@ -2,23 +2,21 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'resource.label', default: 'Resource')}"/>
-  <title><g:message code="default.edit.label" args="[entityName]"/></title>
+  <title>Edit Resource</title>
 </head>
 
 <body>
-<a href="#edit-resource" class="skip" tabindex="-1"><g:message code="default.link.skip.label"
-                                                               default="Skip to content&hellip;"/></a>
+<a href="#edit-resource" class="skip" tabindex="-1">Skip to content&hellip;</a>
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="list" action="index"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
-    <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></li>
+    <li><g:link class="list" action="index">List Resource</g:link></li>
+    <li><g:link class="create" action="create">Create Resource</g:link></li>
   </ul>
 </div>
 
 <div id="edit-resource" class="content scaffold-edit" role="main">
-  <h1><g:message code="default.edit.label" args="[entityName]"/></h1>
+  <h1>${resource.eai} - ${resource.name}</h1>
   <g:if test="${flash.message}">
     <div class="message" role="status">${flash.message}</div>
   </g:if>
@@ -48,11 +46,13 @@
                                                required="true"/>
       </div>
 
-      <div class="fieldcontain">
-        <label for="desc">Description</label><g:textArea name="desc"
-                                                         value="${resource?.desc}"
-                                                         rows="3"/>
-      </div>
+      <g:if test="${resource.desc}">
+        <div class="fieldcontain">
+          <label for="desc">Description</label><g:textArea name="desc"
+                                                           value="${resource.desc}"
+                                                           rows="3"/>
+        </div>
+      </g:if>
 
       <g:if test="${assets}">
         <div class="fieldcontain">
@@ -66,32 +66,46 @@
         </div>
       </g:if>
 
-      <div class="fieldcontain">
-        <label for="contacts">
-          <g:link action="create" controller="contact" title="Create New Contact">Contacts</g:link>
-        </label><g:select name="contacts"
-                          from="${contacts}"
-                          value="${resource?.contacts*.ldap}"
-                          optionKey="ldap"
-                          optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
-                          multiple="true"
-                          size="4"/>
+      <g:if test="${contacts}">
+        <div class="fieldcontain">
+          <label for="contacts">
+            <g:link action="create" controller="contact" title="Create New Contact"><g:message
+                code="vault.label.contacts"/></g:link>
+          </label><g:select name="contacts"
+                            from="${contacts}"
+                            value="${resource.contacts*.ldap}"
+                            optionKey="ldap"
+                            optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
+                            multiple="true"
+                            size="4"/>
 
-      </div>
+        </div>
+      </g:if>
+      <g:else>
+        <div class="fieldcontain">
+          <g:link action="create" controller="contact" title="Create New Contact">Create Contact</g:link>
+        </div>
+      </g:else>
 
       <g:if test="${components}">
         <div class="fieldcontain">
           <label for="components">
-            <g:link action="create" controller="component" title="Create New Component">Components</g:link>
+            <g:link action="create" controller="component" title="Create New Component"><g:message
+                code="vault.label.components"/></g:link>
           </label><g:select name="components"
                             from="${components}"
-                            value="${resource?.components*.id}"
+                            value="${resource.components*.id}"
                             optionKey="id"
                             optionValue="${{ '[' + it.type + '] ' + it.name }}"
                             multiple="true"
                             size="4"/>
         </div>
       </g:if>
+      <g:else>
+        <div class="fieldcontain">
+          <g:link action="create" controller="component" title="Create New Component">Create Component</g:link>
+        </div>
+      </g:else>
 
     </fieldset>
     <fieldset class="buttons">

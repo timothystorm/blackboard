@@ -19,7 +19,7 @@ class Component {
         detail required: false, nullable: true, maxSize: 512
     }
 
-    def componentOf() {
+    def getComponentOf() {
         Resource.withCriteria {
             components {
                 eq('id', id)

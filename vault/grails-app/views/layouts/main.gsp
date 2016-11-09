@@ -25,7 +25,7 @@
         <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand" href="/resource/">
-        FXF-Website Inventory
+        <g:message code="vault.title"/>
       </a>
     </div>
 

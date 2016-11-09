@@ -2,12 +2,11 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <title>${resource.eai}</title>
+  <title>${resource.eai} - ${resource.name}</title>
 </head>
 
 <body>
-<a href="#show-resource" class="skip" tabindex="-1"><g:message code="default.link.skip.label"
-                                                               default="Skip to content&hellip;"/></a>
+<a href="#show-resource" class="skip" tabindex="-1">Skip to content&hellip;</a>
 
 <div class="nav" role="navigation">
   <ul>
@@ -17,7 +16,7 @@
 </div>
 
 <div id="show-resource" class="content scaffold-show" role="main">
-  <h1><g:message code="default.show.label" args="[entityName]"/></h1>
+  <h1>${resource.eai} - ${resource.name}</h1>
   <g:if test="${flash.message}">
     <div class="message" role="status">${flash.message}</div>
   </g:if>
@@ -33,65 +32,64 @@
       <div class="property-value">${resource.name}</div>
     </li>
 
-    <li class="fieldcontain">
-      <span class="property-label">Description</span>
+    <g:if test="${resource.desc}">
+      <li class="fieldcontain">
+        <span class="property-label">Description</span>
 
-      <div class="property-value multi-line">
-        <g:textArea name="resource.desc" value="${resource.desc}" disabled="true"/>
-      </div>
-    </li>
+        <div class="property-value multi-line">
+          <g:textArea name="resource.desc" value="${resource.desc}" disabled="true"/>
+        </div>
+      </li>
+    </g:if>
 
-    <li class="fieldcontain">
-      <span class="property-label">Assets</span>
+    <g:if test="${resource.assets}">
+      <li class="fieldcontain">
+        <span class="property-label">Assets</span>
 
-      <div class="property-value">
-        <g:select name="assets"
-                  from="${resource.assets*.asset}"
-                  optionValue="${{ it.eai + ' - ' + it.name }}"
-                  multiple="true"
-                  size="4"
-                  disabled="true"/>
-      </div>
-    </li>
+        <div class="property-value scrollable">
+          <g:each in="${resource.assets*.asset}">
+            <div><g:link action="show" controller="resource" id="${it.eai}">${it.eai} - ${it.name}</g:link></div>
+          </g:each>
+        </div>
+      </li>
+    </g:if>
 
-    <li class="fieldcontain">
-      <span class="property-label">Contacts</span>
+    <g:if test="${resource.contacts}">
+      <li class="fieldcontain">
+        <span class="property-label">Contacts</span>
 
-      <div class="property-value">
-        <g:select name="contacts"
-                  from="${resource.contacts}"
-                  optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
-                  multiple="true"
-                  size="4"
-                  disabled="true"/>
-      </div>
-    </li>
+        <div class="property-value scrollable">
+          <g:each in="${resource.contacts}">
+            <div><g:link action="show" controller="contact"
+                         id="${it.id}">${it.ldap} - ${it.name?.family}, ${it.name?.given}</g:link></div>
+          </g:each>
+        </div>
+      </li>
+    </g:if>
 
-    <li class="fieldcontain">
-      <span class="property-label">Asset Of</span>
+    <g:if test="${resource.assetOf}">
+      <li class="fieldcontain">
+        <span class="property-label">Asset Of</span>
 
-      <div class="property-value">
-        <g:select name="assets"
-                  from="${resource.assetOf*.root}"
-                  optionValue="${{ it.eai + ' - ' + it.name }}"
-                  multiple="true"
-                  size="4"
-                  disabled="true"/>
-      </div>
-    </li>
+        <div class="property-value scrollable">
+          <g:each in="${resource.assets*.root}">
+            <div><g:link action="show" controller="resource" id="${it.eai}">${it.eai} - ${it.name}</g:link></div>
+          </g:each>
+        </div>
+      </li>
+    </g:if>
 
-    <li class="fieldcontain">
-      <span class="property-label">Components</span>
+    <g:if test="${resource.components}">
+      <li class="fieldcontain">
+        <span class="property-label">Components</span>
 
-      <div class="property-value">
-        <g:select name="components"
-                  from="${resource.components}"
-                  optionValue="${{ '[' + it.type + '] ' + it.name }}"
-                  multiple="true"
-                  size="4"
-                  disabled="true"/>
-      </div>
-    </li>
+        <div class="property-value scrollable">
+          <g:each in="${resource.components}">
+            <div><g:link action="show" controller="component" id="${it.id}">[${it.type}] ${it.name}</g:link></div>
+          </g:each>
+        </div>
+      </li>
+    </g:if>
   </ol>
   <g:form resource="${resource}" method="DELETE" id="${resource?.eai}">
     <fieldset class="buttons">

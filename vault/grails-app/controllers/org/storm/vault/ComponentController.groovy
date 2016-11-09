@@ -5,12 +5,28 @@ class ComponentController {
         [component: new Component()]
     }
 
+    def delete() {
+        with { component ->
+            component.delete()
+            flash.message = "Component removed"
+            redirect action: 'index'
+        }
+    }
+
+    def edit() {
+        with { component -> [component: component] }
+    }
+
     def index() {
         [components: Component.list(params)]
     }
 
     def save() {
         upsert(new Component())
+    }
+
+    def update() {
+        with { component -> upsert(component) }
     }
 
     def show() {

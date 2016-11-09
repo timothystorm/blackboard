@@ -41,13 +41,10 @@
     <li class="fieldcontain">
       <span class="property-label">Resources</span>
 
-      <div class="property-value">
-        <g:select name="resources"
-                  from="${contact.resources}"
-                  optionValue="${{ it.eai + ' - ' + it.name }}"
-                  multiple="true"
-                  size="4"
-                  disabled="true"/>
+      <div class="property-value scrollable">
+        <g:each in="${contact.resources}">
+          <div><g:link action="show" controller="resource" id="${it.eai}">${it.eai} - ${it.name}</g:link></div>
+        </g:each>
       </div>
     </li>
   </ol>

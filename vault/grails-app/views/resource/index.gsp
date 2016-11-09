@@ -2,16 +2,15 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <title>Components</title>
+  <title><g:message code="vault.title.components"/></title>
 </head>
 
 <body>
-<a href="#list-resource" class="skip" tabindex="-1"><g:message code="default.link.skip.label"
-                                                               default="Skip to content&hellip;"/></a>
+<a href="#list-resource" class="skip" tabindex="-1">Skip to content&hellip;</a>
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="create" action="create">Create Component</g:link></li>
+    <li><g:link class="create" action="create"><g:message code="vault.title.createresource"/></g:link></li>
   </ul>
 </div>
 
@@ -24,12 +23,12 @@
     <table>
       <thead>
       <tr>
-        <g:sortableColumn property="eai" title="EAI"/>
-        <g:sortableColumn property="name" title="Name"/>
-        <th>Assets</th>
-        <th>Asset Of</th>
-        <th><g:link action="index" controller="contact">Contacts</g:link></th>
-        <th><g:link action="index" controller="component">Components</g:link></th>
+        <g:sortableColumn property="eai" titleKey="vault.label.eai"/>
+        <g:sortableColumn property="name" titleKey="vault.label.name"/>
+        <th><g:message code="vault.label.assets"/></th>
+        <th><g:message code="vault.label.assetof"/></th>
+        <th><g:link action="index" controller="contact"><g:message code="vault.label.contacts"/></g:link></th>
+        <th><g:link action="index" controller="component"><g:message code="vault.label.components"/></g:link></th>
       </tr>
       </thead>
       <tbody>
