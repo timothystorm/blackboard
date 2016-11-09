@@ -36,28 +36,29 @@
     <fieldset class="form">
       <div class="fieldcontain required">
         <label for="eai">EAI</label><g:field type="number"
-                                             name="resource.eai"
+                                             name="eai"
                                              value="${resource?.eai}"
                                              disabled="true"/>
       </div>
 
       <div class="fieldcontain required">
         <label for="name">Name</label><g:field type="text"
-                                               name="resource.name"
+                                               name="name"
                                                value="${resource?.name}"
                                                required="true"/>
       </div>
 
       <div class="fieldcontain">
-        <label for="detail.desc">Description</label><g:textArea name="resource.desc"
-                                                                value="${resource?.desc}"
-                                                                rows="3"/>
+        <label for="desc">Description</label><g:textArea name="desc"
+                                                         value="${resource?.desc}"
+                                                         rows="3"/>
       </div>
 
       <g:if test="${assets}">
         <div class="fieldcontain">
-          <label for="assets">Assets</label><g:select name="resource.assets"
+          <label for="assets">Assets</label><g:select name="assets"
                                                       from="${assets}"
+                                                      value="${resource?.assets?.asset*.eai}"
                                                       optionKey="eai"
                                                       optionValue="${{ it.eai + ' - ' + it.name }}"
                                                       multiple="true"
@@ -68,14 +69,30 @@
       <div class="fieldcontain">
         <label for="contacts">
           <g:link action="create" controller="contact" title="Create New Contact">Contacts</g:link>
-        </label><g:select name="resource.contacts"
+        </label><g:select name="contacts"
                           from="${contacts}"
+                          value="${resource?.contacts*.ldap}"
                           optionKey="ldap"
                           optionValue="${{ it.ldap + ' - ' + it.name?.family + ', ' + it.name?.given }}"
                           multiple="true"
                           size="4"/>
 
       </div>
+
+      <g:if test="${components}">
+        <div class="fieldcontain">
+          <label for="components">
+            <g:link action="create" controller="component" title="Create New Component">Components</g:link>
+          </label><g:select name="components"
+                            from="${components}"
+                            value="${resource?.components*.id}"
+                            optionKey="id"
+                            optionValue="${{ '[' + it.type + '] ' + it.name }}"
+                            multiple="true"
+                            size="4"/>
+        </div>
+      </g:if>
+
     </fieldset>
     <fieldset class="buttons">
       <input class="save" type="submit" value="${message(code: 'default.button.update.label', default: 'Update')}"/>

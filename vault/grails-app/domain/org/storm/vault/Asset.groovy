@@ -12,6 +12,7 @@ import groovy.transform.PackageScope
 @EqualsAndHashCode(includes = 'root, asset')
 class Asset implements Serializable {
     Resource asset
+
     static belongsTo = [root: Resource]
     static mapping = {
         version false

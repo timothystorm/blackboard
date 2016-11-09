@@ -23,7 +23,35 @@
   <g:if test="${flash.message}">
     <div class="message" role="status">${flash.message}</div>
   </g:if>
-  <f:display bean="component"/>
+  <ol class="property-list component">
+    <li class="fieldcontain">
+      <span class="property-label">Type</span>
+
+      <div class="property-value">${component?.type}</div>
+    </li>
+    <li class="fieldcontain">
+      <span class="property-label">Name</span>
+
+      <div class="property-value">${component?.name}</div>
+    </li>
+    <li class="fieldcontain">
+      <span class="property-label">Detail</span>
+
+      <div class="property-value">${component?.detail}</div>
+    </li>
+    <li class="fieldcontain">
+      <span class="property-label">Component</span>
+
+      <div class="property-value">
+        <g:select name="resources"
+                  from="${component?.componentOf()}"
+                  optionValue="${{ it.eai + ' - ' + it.name }}"
+                  multiple="true"
+                  size="4"
+                  disabled="true"/>
+      </div>
+    </li>
+  </ol>
   <g:form resource="${this.component}" method="DELETE">
     <fieldset class="buttons">
       <g:link class="edit" action="edit" resource="${this.component}"><g:message code="default.button.edit.label"

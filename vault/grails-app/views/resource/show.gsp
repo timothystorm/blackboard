@@ -79,6 +79,19 @@
                   disabled="true"/>
       </div>
     </li>
+
+    <li class="fieldcontain">
+      <span class="property-label">Components</span>
+
+      <div class="property-value">
+        <g:select name="components"
+                  from="${resource.components}"
+                  optionValue="${{ '[' + it.type + '] ' + it.name }}"
+                  multiple="true"
+                  size="4"
+                  disabled="true"/>
+      </div>
+    </li>
   </ol>
   <g:form resource="${resource}" method="DELETE" id="${resource?.eai}">
     <fieldset class="buttons">

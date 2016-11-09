@@ -12,7 +12,8 @@
 
 <div class="nav" role="navigation">
   <ul>
-    <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]"/></g:link></li>
+    <li><g:link class="create" action="create"><g:message code="default.new.label"
+                                                          args="[entityName]"/></g:link></li>
   </ul>
 </div>
 
@@ -21,31 +22,34 @@
     <div class="message" role="status">${flash.message}</div>
   </g:if>
 
-  <table>
-    <thead>
-    <tr>
-      <g:sortableColumn property="ldap" title="LDAP"/>
-      <g:sortableColumn property="name" title="Name"/>
-      <g:sortableColumn property="email" title="Email"/>
-      <th><g:link action="index" controller="resource">Resources</g:link></th>
-    </tr>
-    </thead>
-    <tbody>
-    <g:each in="${contacts}" var="contact">
+  <g:if test="${contacts}">
+    <table>
+      <thead>
       <tr>
-        <td><g:link action="show" id="${contact.ldap}">${contact.ldap}</g:link></td>
-        <td><g:link action="show" id="${contact.ldap}">${contact.name?.family}, ${contact.name?.given}</g:link></td>
-        <td><g:link action="show" id="${contact.ldap}">${contact.email}</g:link></td>
-        <td>
-          <g:each in="${contact.resources}" var="resource">
-            <div><g:link action="show" id="${resource.eai}"
-                         controller="resource">${resource.eai} - ${resource.name}</g:link></div>
-          </g:each>
-        </td>
+        <g:sortableColumn property="ldap" title="LDAP"/>
+        <g:sortableColumn property="name" title="Name"/>
+        <g:sortableColumn property="email" title="Email"/>
+        <th><g:link action="index" controller="resource">Resources</g:link></th>
       </tr>
-    </g:each>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+      <g:each in="${contacts}" var="contact">
+        <tr>
+          <td><g:link action="show" id="${contact.ldap}">${contact.ldap}</g:link></td>
+          <td><g:link action="show"
+                      id="${contact.ldap}">${contact.name?.family}, ${contact.name?.given}</g:link></td>
+          <td><g:link action="show" id="${contact.ldap}">${contact.email}</g:link></td>
+          <td>
+            <g:each in="${contact.resources}" var="resource">
+              <div><g:link action="show" id="${resource.eai}"
+                           controller="resource">${resource.eai} - ${resource.name}</g:link></div>
+            </g:each>
+          </td>
+        </tr>
+      </g:each>
+      </tbody>
+    </table>
+  </g:if>
 </div>
 </body>
 </html>
