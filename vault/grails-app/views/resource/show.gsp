@@ -72,7 +72,7 @@
         <span class="property-label">Asset Of</span>
 
         <div class="property-value scrollable">
-          <g:each in="${resource.assets*.root}">
+          <g:each in="${resource.assetOf*.root}">
             <div><g:link action="show" controller="resource" id="${it.eai}">${it.eai} - ${it.name}</g:link></div>
           </g:each>
         </div>
