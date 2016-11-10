@@ -5,11 +5,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.storm.papyrus.category.Unit;
 
+@Category(Unit.class)
 public class SoftCacheTest {
 
   @Test
@@ -47,6 +51,11 @@ public class SoftCacheTest {
 
     assertNull(cache.put("myKey", "myFirstValue"));
     assertEquals("myFirstValue", cache.put("myKey", "mySecondValue"));
+
+    try {
+      cache.put(null, "");
+      fail("expected NPE for null key");
+    } catch (NullPointerException expected) {}
   }
 
   @Test
@@ -56,5 +65,8 @@ public class SoftCacheTest {
     assertNull(cache.put("myKey", "myValue"));
     assertEquals("myValue", cache.remove("myKey"));
     assertNull(cache.get("myKey"));
+
+    // remove non existent
+    assertNull(cache.remove("NOOP"));
   }
 }

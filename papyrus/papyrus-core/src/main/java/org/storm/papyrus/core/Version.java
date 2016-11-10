@@ -6,26 +6,32 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Project level versioning attributes
+ *
+ * @author Timothy Storm
+ */
 public class Version {
-  private static String        LF              = System.getProperty("line.separator");
-  private static String        EMPTY           = " ";
-
-  /** cache application properties so they are not reloaded every time they are accessed */
+  /**
+   * cache application properties so they are not reloaded every time they are accessed
+   */
   static Properties            _propsCache;
 
-  /** cache svuid (serialization ID) so it isn't recalculated every time it is accessed */
+  /**
+   * cache svuid (serialization ID) so it isn't recalculated every time it is accessed
+   */
   static Long                  _svuidCache;
 
   /**
    * <pre>
-   * [0-9]{1,3} : [major] 1 to 3 digits (required) 
-   * [0-9]{1,3} : [minor] 1 to 3 digits (required) 
+   * [0-9]{1,3} : [major] 1 to 3 digits (required)
+   * [0-9]{1,3} : [minor] 1 to 3 digits (required)
    * [0-9]{1,3} : [maint] 1 to 3 digits (required)
    * \\w+       : [build] any number of word characters (optional)
    * </pre>
    */
   private static final Pattern VERSION_PATTERN = Pattern.compile(
-      "([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\-?(\\w+)$");
+      "([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\-?(\\w*)$");
 
   public static final String buildVersion() {
     return versionPart(4);
@@ -86,23 +92,6 @@ public class Version {
     return _propsCache == null ? null : _propsCache.getProperty(key);
   }
 
-  public static void main(String[] args) {
-    StringBuilder info = new StringBuilder();
-    info.append("Specification-Title:")
-        .append(name())
-        .append(LF);
-    info.append("Specification-Version:")
-        .append(version())
-        .append(LF);
-    info.append("Built-At:")
-        .append(builtAt())
-        .append(LF);
-    info.append("Built-By:")
-        .append(builtBy())
-        .append(LF);
-    System.out.print(info.toString());
-  }
-
   public static final String maintenanceVersion() {
     return versionPart(3);
   }
@@ -149,7 +138,7 @@ public class Version {
   /**
    * Extracts the version parts and returns the requested part (1:major, 2:minor, 3:maintenance, 4:build). If the part
    * if less than 0 then the full version is returned.
-   * 
+   *
    * @param part
    *          of the version required
    * @return version part or empty string if not found
@@ -159,9 +148,9 @@ public class Version {
     int p = Math.max(0, part);
 
     Matcher matcher = VERSION_PATTERN.matcher(version());
-    if (matcher.find() && matcher.groupCount() >= p) return matcher.group(p);
+    if (matcher.matches() && matcher.groupCount() >= p) return matcher.group(p);
 
     // something wonky
-    return EMPTY;
+    return "";
   }
 }

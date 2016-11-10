@@ -16,10 +16,10 @@ import java.util.concurrent.TimeUnit;
  * framework should be used instead - EHCache.
  * 
  * @author Timothy Storm
- * @param <K>
- * @param <V>
+ * @param <K> key type
+ * @param <V> value type
  */
-public class SoftCache<K, V> implements Cache<K, V> {
+class SoftCache<K, V> implements Cache<K, V> {
   /** keep a soft reference to allow gc if memory gets low **/
   private final transient Map<K, SoftReference<CacheEntry<K, V>>> _cache = new ConcurrentHashMap<>();
 
@@ -87,6 +87,7 @@ public class SoftCache<K, V> implements Cache<K, V> {
 
   @Override
   public V put(K key, V value) {
+    if(key == null) throw new NullPointerException("key required!");
     return put(key, value, 10, TimeUnit.MINUTES);
   }
 

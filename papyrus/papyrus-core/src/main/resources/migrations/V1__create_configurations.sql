@@ -1,5 +1,8 @@
 DROP TABLE IF EXISTS configurations;
 
+-- removes flyway tracking table
+DROP TABLE IF EXISTS schema_version;
+
 CREATE TABLE configurations (
 	id BIGSERIAL PRIMARY KEY,
 	scope VARCHAR(128) NOT NULL DEFAULT 'ALL',

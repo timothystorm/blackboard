@@ -4,5 +4,5 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ ConfigManagerTest.class, SoftCacheTest.class })
-public class _Suite {}
+@Suite.SuiteClasses({ _Unit.class, _Integration.class })
+public class _All {}

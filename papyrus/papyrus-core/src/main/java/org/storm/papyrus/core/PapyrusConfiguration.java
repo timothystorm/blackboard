@@ -1,6 +1,5 @@
 package org.storm.papyrus.core;
 
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,7 +50,7 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       pstmt.setString(2, key);
       pstmt.setObject(3, value);
       pstmt.executeUpdate();
-      if(!conn.getAutoCommit()) conn.commit();
+      if (!conn.getAutoCommit()) conn.commit();
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.WRITE, ConfigurationEvent.ADD_PROPERTY, key, value, e);
     }
@@ -63,7 +62,7 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       pstmt.setString(1, _scope);
       pstmt.setString(2, key);
       pstmt.executeUpdate();
-      if(!conn.getAutoCommit()) conn.commit();
+      if (!conn.getAutoCommit()) conn.commit();
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.WRITE, ConfigurationEvent.CLEAR_PROPERTY, key, null, e);
     }
@@ -79,14 +78,15 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       }
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.READ, ConfigurationErrorEvent.READ, key, null, e);
+      return false;
     }
-    return false;
   }
 
-  private Object convertClob(Clob clob) throws SQLException {
-    int len = (int) clob.length();
-    return (len > 0) ? clob.getSubString(1, len) : "";
-  }
+  // TODO: Should CLOB even be handled???
+  // private Object convertClob(Clob clob) throws SQLException {
+  // int len = (int) clob.length();
+  // return (len > 0) ? clob.getSubString(1, len) : "";
+  // }
 
   @Override
   protected Iterator<String> getKeysInternal() {
@@ -114,7 +114,9 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Object value = rs.getObject("value");
-          if (value instanceof Clob) value = convertClob((Clob) value);
+
+          // TODO: Should CLOB even be handled???
+          // if (value instanceof Clob) value = convertClob((Clob) value);
 
           for (Object o : getListDelimiterHandler().parse(value)) {
             results.add(o);
@@ -138,7 +140,7 @@ public class PapyrusConfiguration extends AbstractConfiguration {
       }
     } catch (SQLException e) {
       fireError(ConfigurationErrorEvent.READ, ConfigurationErrorEvent.READ, null, null, e);
+      return true;
     }
-    return true;
   }
 }

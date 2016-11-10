@@ -85,25 +85,27 @@
         <directory>src/main/resources</directory>
       </resource>
       <resource>
-      	<filtering>true</filtering>
-      	<directory>src/test/resources</directory>
+        <filtering>true</filtering>
+        <directory>src/test/resources</directory>
       </resource>
     </resources>
 
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5</version>
-        <configuration>
-          <source>${jdk.version}</source>
-          <target>${jdk.version}</target>
-          <verbose>true</verbose>
-          <fork>true</fork>
-          <executable>${java_home}/bin/javac</executable>
-          <compilerVersion>${jdk.version}</compilerVersion>
-        </configuration>
-      </plugin>
-    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.5</version>
+          <configuration>
+            <source>${jdk.version}</source>
+            <target>${jdk.version}</target>
+            <verbose>true</verbose>
+            <fork>true</fork>
+            <executable>${java_home}/bin/javac</executable>
+            <compilerVersion>${jdk.version}</compilerVersion>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>
