@@ -7,25 +7,8 @@
     <version>0.0.0</version>
   </parent>
 
-  <artifactId>papyrus-rest</artifactId>
+  <artifactId>papyrus-web</artifactId>
   <packaging>war</packaging>
-
-  <properties>
-    <springframework.version>4.3.3.RELEASE</springframework.version>
-  </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>papyrus-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-      <version>${springframework.version}</version>
-    </dependency>
-  </dependencies>
 
   <build>
     <plugins>

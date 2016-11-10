@@ -16,11 +16,13 @@
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+    <!-- <dependency> <groupId>${project.groupId}</groupId> <artifactId>papyrus-ejb</artifactId> <version>${project.version}</version> 
+      <type>ejb</type> </dependency> -->
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>papyrus-ejb</artifactId>
+      <artifactId>papyrus-rest</artifactId>
       <version>${project.version}</version>
-      <type>ejb</type>
+      <type>war</type>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -39,19 +41,21 @@
         <configuration>
           <defaultLibBundleDir>lib/</defaultLibBundleDir>
           <modules>
+            <jarModule>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>papyrus-core</artifactId>
+            </jarModule>
+            <webModule>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>papyrus-rest</artifactId>
+              <contextRoot>/rest</contextRoot>
+            </webModule>
             <webModule>
               <groupId>${project.groupId}</groupId>
               <artifactId>papyrus-web</artifactId>
               <contextRoot>/</contextRoot>
             </webModule>
-            <ejbModule>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>papyrus-ejb</artifactId>
-            </ejbModule>
-            <jarModule>
-              <groupId>${project.groupId}</groupId>
-              <artifactId>papyrus-core</artifactId>
-            </jarModule>
+            <!-- <ejbModule> <groupId>${project.groupId}</groupId> <artifactId>papyrus-ejb</artifactId> </ejbModule> -->
           </modules>
 
           <archive>
@@ -61,6 +65,7 @@
             </manifest>
             <manifestEntries>
               <Built-At>${timestamp}</Built-At>
+              <Built-By>${user.name}</Built-By>
             </manifestEntries>
           </archive>
         </configuration>

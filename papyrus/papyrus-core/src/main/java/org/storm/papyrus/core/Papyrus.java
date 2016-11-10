@@ -41,7 +41,7 @@ public interface Papyrus {
    *          - property is mapped to
    * @return property value or null if no property is mapped to the key in scope
    */
-  Object getProperty(String scope, String key);
+  String getProperty(String scope, String key);
 
   /**
    * Save many properties in the provided scope

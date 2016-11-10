@@ -53,9 +53,9 @@ public class BasePapyrus implements Papyrus {
    * {@inheritDoc}
    */
   @Override
-  public Object getProperty(String scope, String key) {
+  public String getProperty(String scope, String key) {
     return _factory.createConfiguration(scope)
-                   .getProperty(key);
+                   .getString(key);
   }
 
   /**
