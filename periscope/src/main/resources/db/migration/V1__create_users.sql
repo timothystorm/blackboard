@@ -1,0 +1,11 @@
+CREATE TABLE periscope.users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  username VARCHAR(256) NOT NULL UNIQUE,
+  salt CHAR(64) NOT NULL,
+  password VARCHAR(256) NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT FALSE,
+
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
+
+CREATE INDEX username_index ON periscope.users (username);
