@@ -1,1 +1,6 @@
-/.project
+**/*.gradle
+**/*.idea
+**/*.project
+**/*.settings
+**/out/
+**/target/
