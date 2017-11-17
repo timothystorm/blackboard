@@ -2,86 +2,71 @@ package org.storm.periscope.domain;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.function.Function;
 
+/**
+ * Immutable user details.
+ */
 public class User implements Serializable {
     private static final long serialVersionUID = 5026142403543143203L;
-    private final String _username;
-    private final transient String _password;
+    private final String _username, _salt;
     private final boolean _enabled;
-
-    /**
-     * Construct a <code>User</code> that is disabled.
-     *
-     * @param username - user principal
-     * @param password - user credentials, should be encoded (encrypted)
-     * @throws IllegalArgumentException if a <code>null</code> value was passed for the username or password
-     */
-    public User(String username, String password) {
-        this(username, password, false);
-    }
+    private final transient String _password; /* not file to allow for erasure */
 
     /**
      * Construct a <code>User</code>.
      *
      * @param username - user principal
-     * @param password - user credentials, should be encoded (encrypted)
+     * @param password - user credentials
      * @param enabled  - set to <code>true</code> if the user is enabled
      * @throws IllegalArgumentException if a <code>null</code> value was passed for the username or password
      */
-    public User(String username, String password, boolean enabled) {
+    private User(String username, String password, String salt, boolean enabled) {
         if (username == null || username.trim().isEmpty() || password == null) {
             throw new IllegalArgumentException("username and password required");
         }
         _username = username;
         _password = password;
+        _salt = salt;
         _enabled = enabled;
     }
 
     /**
-     * Creates a User.Builder with a specified user name
+     * Constructs a basic <code>User</code> with no salt and disabled
      *
-     * @param username the username to use
-     * @return the User.Builder
+     * @param username - user principal
+     * @param password - user credentials
+     * @return constructed <code>User</code>
      */
-    public static User.Builder withUsername(String username) {
-        return new User.Builder().username(username);
-    }
-
-    public User eraseCredentials() {
-        return new User(_username, null, _enabled);
+    public static User with(String username, String password) {
+        return new User(username, password, null, false);
     }
 
     public String getUsername() {
         return _username;
     }
 
-    public User setUsername(String username) {
-        return new User(username, _password, _enabled);
+    public User withUsername(String username) {
+        return new User(username, _password, _salt, _enabled);
     }
 
     public String getPassword() {
-        return _password == null ? null : new String(_password);
+        return _password;
     }
 
-    public User setPassword(String password) {
-        return new User(_username, password, _enabled);
+    public User withPassword(String password) {
+        return new User(_username, password, _salt, _enabled);
     }
 
     public boolean isEnabled() {
         return _enabled;
     }
 
-    public User setEnabled(boolean enabled) {
-        return new User(_username, _password, enabled);
+    public User enabled() {
+        return new User(_username, _password, _salt, true);
     }
 
-    public User enable() {
-        return setEnabled(true);
-    }
-
-    public User disable() {
-        return setEnabled(false);
+    public User disabled() {
+        return new User(_username, _password, _salt, false);
     }
 
     @Override
@@ -100,15 +85,14 @@ public class User implements Serializable {
         StringBuilder str = new StringBuilder();
         str.append(super.toString()).append(": ");
         str.append("username: ").append(_username).append("; ");
-        str.append("passwword: [PROTECTED]; ");
+        str.append("password: [PROTECTED]; ");
         str.append("enabled: ").append(_enabled);
         return str.toString();
     }
 
     public static class Builder {
-        private String _username, _password;
+        private String _username, _password, _salt;
         private boolean _enabled = false;
-        private Function<String, String> _encoder = password -> password;
 
         private Builder() {
         }
@@ -138,19 +122,6 @@ public class User implements Serializable {
         }
 
         /**
-         * Encodes the current password (if non-null) and any future passwords supplied
-         * to {@link #password(String)}.
-         *
-         * @param encoder the encoder to use
-         * @return @return this {@link User.Builder} for method chaining
-         */
-        public User.Builder passwordEncoder(Function<String, String> encoder) {
-            Objects.requireNonNull(encoder, "encoder required");
-            _encoder = encoder;
-            return this;
-        }
-
-        /**
          * Defines if the account is enabled or not. Default is false.
          *
          * @param enabled - false if the account is disabled, true othewise
@@ -161,9 +132,13 @@ public class User implements Serializable {
             return this;
         }
 
+        public User.Builder salt(String salt) {
+            _salt = salt;
+            return this;
+        }
+
         public User build() {
-            String encodedPassword = _encoder.apply(_password);
-            return new User(_username, encodedPassword, _enabled);
+            return new User(_username, _password, _salt, _enabled);
         }
     }
 }
