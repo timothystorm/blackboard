@@ -7,5 +7,3 @@ CREATE TABLE periscope.users (
 
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8;
-
-CREATE INDEX username_index ON periscope.users (username);
