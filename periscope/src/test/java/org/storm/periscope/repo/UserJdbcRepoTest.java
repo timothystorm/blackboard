@@ -5,6 +5,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.storm.periscope.domain.User;
 
 import javax.sql.DataSource;
@@ -41,6 +42,7 @@ public class UserJdbcRepoTest {
     }
 
     @Test
+    @Ignore
     public void tets_findByUsername() throws Exception {
         User user = _repo.findByUsername("timmy");
         assertNotNull(user);
