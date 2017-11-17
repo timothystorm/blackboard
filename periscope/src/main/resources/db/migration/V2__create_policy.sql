@@ -1,0 +1,9 @@
+/* User policy and disposition attributes */
+CREATE TABLE periscope.policy (
+  id BIGINT UNSIGNED NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  expired BOOLEAN NOT NULL DEFAULT FALSE,
+  locked BOOLEAN NOT NULL DEFAULT FALSE,
+
+  FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
+)DEFAULT CHARSET=UTF8;
