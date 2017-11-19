@@ -1,0 +1,29 @@
+plugins {
+    id "org.flywaydb.flyway" version "4.2.0"
+//    flyway configurations: ~/.gradle/gradle.properties
+}
+
+group 'org.storm'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+ext {
+    groovyVersion ='2.4.+'
+    junitVersion = '4.+'
+    mysqlConnectorVersion = '6.0.+'
+    shiroVersion = '1.4.+'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "mysql:mysql-connector-java:${mysqlConnectorVersion}"
+    compile "org.apache.shiro:shiro-core:${shiroVersion}"
+
+    testCompile "junit:junit:${junitVersion}"
+    testCompile "org.codehaus.groovy:groovy:${groovyVersion}"
+}
