@@ -6,7 +6,7 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Immutable user identity attributes.
+ * Immutable user attributes.
  */
 public class User implements CredentialErasure, Status, Serializable {
   private static final long serialVersionUID = 5026142403543143203L;
